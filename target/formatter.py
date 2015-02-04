@@ -50,57 +50,41 @@ def coinTargetFormatter( name):
     extension = ".xlsx"
     
     filename = name + extension
-    
     # open workbook
     book = xlrd.open_workbook(filename, on_demand=True)
     # open sheet
     # ASSUMPTION: There is only one sheet (position 0)
-    sh = book.sheet_by_index(0)
-    
-    # grab mission name for use in target name formatting
-    # ASSUMPTION: Always in position 0x0
-    missionName = sh.cell_value(rowx=0, colx=0)
-    
-    # split mission name based on " "
-    missionName = missionName.split(" ")
-    
-    # ASSUMPTION: Report name format is always the same (position 2)
-    missionName = missionName[2]
-    # split name into parts
-    missionName = missionName.split("-")
-    # end result is vehicle number and date
-    missionName = missionName[0] + "-" + missionName[1]
-    
+    sh = book.sheet_by_index(0) 
     # list to hold targets
     targets = []
     
     # Find rows containing targets
-    # ASSUMPTION: Target row always starts with "CRN: " in column 0
-    # ASSUMPTION: Target category is always in column 4
-    # ASSUMPTION: Target coordinates are always in column 6
+    # ASSUMPTION: Target row always starts with "CRN: " in column 1
+    # ASSUMPTION: Target category is always current "CRN: " row + 2 in column 2
+    # ASSUMPTION: Target coordinates are always in current "CRN: " row + 5 in column 2
     for row in range(sh.nrows):
         # list to hold target information
         target = []
         # check if valid row and target row
-        if sh.cell_value(rowx=row, colx=0) and sh.cell_value(rowx=row, colx=0).startswith("CRN: "):
+        if sh.cell_value(rowx=row, colx=1) and sh.cell_value(rowx=row, colx=1).startswith("CRN: "):
             # strip off "CRN: " prefix add mission name
-            targetName = sh.cell_value(rowx=row, colx=0)
+            
+            targetName = sh.cell_value(rowx=row, colx=1)
             targetName = targetName.split(" ")
-            # add mission name as prefix
-            targetName = targetName[1]
-            # add mission name to target attribute list
-            target.append(missionName)
             # add name to target attribute list
-            target.append(targetName)
+            target.append(targetName[1])
             # grab target type from current row
-            targetType = sh.cell_value(rowx=row, colx=4)
+            targetType = sh.cell_value(rowx=row+2, colx=2)
+            targetType = targetType.split(" ")
             # add type to target attribute list
-            target.append(targetType)
+            target.append(targetType[1])
             # grab target coord from current row
-            targetCoord = sh.cell_value(rowx=row, colx=6)
+            targetCoord = sh.cell_value(rowx=row+5, colx=2)
             # split coord into LAT and LONG
             targetCoord = targetCoord.split(",")
             # lat first then long
+            targetLat = targetCoord[0].split(" ")
+            targetCoord[0] = targetLat[1] + " " + targetLat[2]
             targetLat = coordConverter(targetCoord[0])
             # add target LAT to target attribute list
             target.append(targetLat)
@@ -126,7 +110,7 @@ def printTargets( targetList):
         for attribute in target:
             print attribute, 
         print "\n"
-        break
+        #break
             
 # function for comparing two COIN PMD missions and
 # writing output to csv file
@@ -136,36 +120,24 @@ def compareOutput( missionOne, missionTwo, maxDist, outputName):
     outputName = outputName + ".csv"
     # create / open output file in write mode
     fout = open(outputName, 'w')
-    missionOneName = missionOne[0][0]
-    missionTwoName = missionTwo[0][0]
-    # Mission 1 only targets
-    fout.write("Targets present only in " + missionOneName + "\n")
-    fout.write("Mission, Target Name, Category, LAT, LONG\n")
+
+    # Horizontal positive match within maxDist
+    fout.write("Target match within distance of " + str(maxDist) + "m\n")
+    fout.write("Target Name, Category, LAT, LONG, Horizontal Distance\n")
     for a in missionOne:
-        present = False
         for b in missionTwo:
-            if haversine(a[3], a[4], b[3], b[4]) < maxDist:
-                present = True
-        if present == False:
-            fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(a[4]) + "\n")
-    fout.write("\n")     
-    # Mission 2 only targets 
-    fout.write("Targets present only in " + missionTwoName + "\n")
-    fout.write("Mission, Target Name, Category, LAT, LONG\n")
+            if haversine(a[2], a[3], b[2], b[3]) < maxDist:
+                fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(haversine(a[2], a[3], b[2], b[3])) + "\n")
+                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + str(b[3]) + "\n")
+                fout.write(",\n")
+    # False alarms 
+    fout.write("False Alarms" + "\n")
+    fout.write("Target Name, Category, LAT, LONG\n")
     for a in missionTwo:
         present = False
         for b in missionOne:
-            if haversine(a[3], a[4], b[3], b[4]) < maxDist:
+            if haversine(a[2], a[3], b[2], b[3]) < maxDist:
                 present = True
         if present == False:
-            fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(a[4]) + "\n")
+            fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "\n")
     fout.write("\n")     
-    # Mission 1 and Mission 2 within maxDist
-    fout.write("Targets present in both mission " + missionOneName + " and " + missionTwoName + " within distance of " + str(maxDist) + "m\n")
-    fout.write("Mission, Target Name, Category, LAT, LONG, Distance\n")
-    for a in missionOne:
-        for b in missionTwo:
-            if haversine(a[3], a[4], b[3], b[4]) < maxDist:
-                fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(a[4]) + "," + str(haversine(a[3], a[4], b[3], b[4])) + "\n")
-                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + str(b[3]) + "," + str(b[4]) + "\n")
-                fout.write(",\n")

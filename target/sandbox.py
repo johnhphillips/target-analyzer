@@ -14,7 +14,7 @@ def rangeTargetFormatter( name):
     newFilename = name + newExtension
     
     # CONVERT FROM .xlsx to .xls file
-    xl = win32com.client.DispatchEx('Excel.Application')
+    xl = win32com.client.DispatchEx("Excel.Application")
     xl.DisplayAlerts = False
     wb = xl.Workbooks.Open(os.path.join(os.getcwd(), oldFilename))
     
