@@ -1,11 +1,11 @@
-import math
+from math import radians, sin, cos, asin, sqrt
 import xlrd
 
 # TODO: Add exception handling
 # TODO: Add constants to top
 # TODO: Change into Class
 
-# function to convert given coord from COIN to +/- decimal degrees
+# function to convert given coord from COIN format to +/- decimal degrees
 def coordConverter( coord):
     # strip leading spaces
     coord = coord.lstrip(" ")
@@ -30,26 +30,36 @@ def haversine(lat1, long1, lat2, long2):
     earthRadius = 6378100
     
     # convert decimal degrees to radians 
-    lat1 = math.radians(lat1)
-    long1 = math.radians(long1)
-    lat2 = math.radians(lat2)
-    long2 = math.radians(long2)
+    lat1 = radians(lat1)
+    long1 = radians(long1)
+    lat2 = radians(lat2)
+    long2 = radians(long2)
 
     # haversine formula 
     dlong = long2 - long1 
     dlat = lat2 - lat1 
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlong/2)**2
-    c = 2 * math.asin(math.sqrt(a)) 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlong/2)**2
+    c = 2 * asin(sqrt(a)) 
 
     m = earthRadius * c
     return m 
 
-# function that takes mission file name, opens COIN mission report
+# function to print target list with attributes to console 
+# for debugging
+def printTargets( targetList):
+    # print targets
+    for target in targetList:
+        for attribute in target:
+            print attribute, 
+        print "\n"
+        #break
+
+# function that takes report file name, opens COIN PMD report
 # and returns list containing target data with attributes
-def coinTargetFormatter( name):
+def coinContactFormatter( reportName):
     extension = ".xlsx"
     
-    filename = name + extension
+    filename = reportName + extension
     # open workbook
     book = xlrd.open_workbook(filename, on_demand=True)
     # open sheet
@@ -68,7 +78,7 @@ def coinTargetFormatter( name):
         # check if valid row and target row
         if sh.cell_value(rowx=row, colx=1) and sh.cell_value(rowx=row, colx=1).startswith("CRN: "):
             # strip off "CRN: " prefix add mission name
-            
+            target.append(reportName)
             targetName = sh.cell_value(rowx=row, colx=1)
             targetName = targetName.split(" ")
             # add name to target attribute list
@@ -102,42 +112,56 @@ def coinTargetFormatter( name):
              
     targets = temp
     return targets
-# function to print target list with attributes to console 
-# for debugging
-def printTargets( targetList):
-    # print targets
-    for target in targetList:
-        for attribute in target:
-            print attribute, 
-        print "\n"
-        #break
             
 # function for comparing two COIN PMD missions and
 # writing output to csv file
 # TODO: extend to any number of missions (list of target lists as input)
-def compareOutput( missionOne, missionTwo, maxDist, outputName):
+def contactLocalization( missionOne, missionTwo, maxDist, outputName):
     # extension of output file, CSV
     outputName = outputName + ".csv"
     # create / open output file in write mode
     fout = open(outputName, 'w')
-
-    # Horizontal positive match within maxDist
-    fout.write("Target match within distance of " + str(maxDist) + "m\n")
-    fout.write("Target Name, Category, LAT, LONG, Horizontal Distance\n")
+    
+    # Print contact matches to ground truth position within maxDist
+    fout.write("Ground truth calls within distance of " + str(maxDist) + "m\n")
+    fout.write("Source, Name, Category, LAT, LONG, Distance\n")
     for a in missionOne:
         for b in missionTwo:
-            if haversine(a[2], a[3], b[2], b[3]) < maxDist:
-                fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(haversine(a[2], a[3], b[2], b[3])) + "\n")
-                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + str(b[3]) + "\n")
+            if haversine(a[3], a[4], b[3], b[4]) < maxDist:
+                fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(a[4]) + "," + str(haversine(a[3], a[4], b[3], b[4])) + "\n")
+                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + str(b[3]) + "," + str(b[4]) + "\n")
                 fout.write(",\n")
-    # False alarms 
-    fout.write("False Alarms" + "\n")
-    fout.write("Target Name, Category, LAT, LONG\n")
+    
+    # Print false alarms 
+    fout.write("False alarms\n")
+    fout.write("Source, Name, Category, LAT, LONG\n")
     for a in missionTwo:
         present = False
         for b in missionOne:
-            if haversine(a[2], a[3], b[2], b[3]) < maxDist:
+            if haversine(a[3], a[4], b[3], b[4]) < maxDist:
                 present = True
         if present == False:
-            fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "\n")
+            fout.write(str(a[0]) + "," + str(a[1]) + "," + str(a[2]) + "," + str(a[3]) + "," + str(a[4]) + "\n")
     fout.write("\n")     
+    
+    fout.close()
+    
+# function for parsing contact XML file
+def contactParser( fileName):
+    # extension of input file, XML
+    fileName = fileName + ".XML"
+    
+    # Open the file 
+    f = open(fileName, 'r')
+    # Read line 1
+    line = f.readline()
+    while line:
+        parts = line.split()
+        print parts[0]
+        line = f.readline()
+#    while line:
+#        print line
+#        line = file.readline()
+        
+    # Close the file
+    f.close()

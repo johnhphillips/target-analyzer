@@ -13,9 +13,11 @@ nameTwo = "Soto MSN09"
 outputName = "Horizontal CLA"
 
 # build contact list from input PMD Reports
-listOne = formatter.coinTargetFormatter( nameOne) 
-print "-----" 
-listTwo = formatter.coinTargetFormatter( nameTwo)
+listOne = formatter.coinContactFormatter( nameOne) 
+
+listTwo = formatter.coinContactFormatter( nameTwo)
 
 # build output comparison from target lists
-formatter.compareOutput( listOne, listTwo, maxDist, outputName)
+formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
+
+formatter.contactParser(nameTwo)
