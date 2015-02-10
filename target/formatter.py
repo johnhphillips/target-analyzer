@@ -1,5 +1,6 @@
 from math import radians, sin, cos, asin, sqrt
 import xlrd
+import xml.etree.cElementTree as ET
 
 # TODO: Add exception handling
 # TODO: Add constants to top
@@ -151,17 +152,49 @@ def contactParser( fileName):
     # extension of input file, XML
     fileName = fileName + ".XML"
     
-    # Open the file 
-    f = open(fileName, 'r')
-    # Read line 1
-    line = f.readline()
-    while line:
-        parts = line.split()
-        print parts[0]
-        line = f.readline()
-#    while line:
-#        print line
-#        line = file.readline()
-        
-    # Close the file
-    f.close()
+    message = ET.ElementTree(file=fileName)
+    
+    for contact in message.iter(tag='{http://www.saic.com/navy/miwml.1.0}TacticalContact'):
+       
+        for attribute in contact.iter():
+            
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}TacticalContact':
+                print attribute.attrib['contact_id']
+                
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}CRN':
+                print attribute.text
+                
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}Latitude':
+                #TODO: Add attribute units check
+                print attribute.text
+
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}Longitude':
+                #TODO: Add attribute units check
+                print attribute.text
+                
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}ContactKind':
+                print attribute.text
+
+            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}CaseDepth':
+                print attribute.text + ' ' + attribute.attrib['units']
+
+    
+#     # Open the file 
+#     f = open(fileName, 'r')
+#     # Read line 1
+#     line = f.readline()
+#     while line:
+#         parts = line.split()
+#         # check for contact tag
+#         if parts[0] == "<TacticalContact":
+#             print parts[0]
+#             line = f.readline()
+#             # check for CRN
+#             print line
+#         line = f.readline()
+# #    while line:
+# #        print line
+# #        line = file.readline()
+#         
+#     # Close the file
+#     f.close()
