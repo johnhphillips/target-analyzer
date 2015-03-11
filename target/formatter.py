@@ -210,8 +210,19 @@ def ctdParser( fileName):
         
         rows.append(row)
         
+    # grab start and end lat/lon    
+    startLat = float(rows[1][0])
+    startLon = float(rows[1][1])
+    endLat = float(rows[len(rows) - 1][0])
+    endLon = float(rows[len(rows) - 1][1])
+    
+    radius = haversine(startLat, startLon, endLat, endLon)
+    
+    print radius
+    
     count = 0    
     for row in rows: 
+        # skip header (first) row
         if count == 0:
             count = count + 1
             continue
