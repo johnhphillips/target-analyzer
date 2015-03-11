@@ -9,7 +9,7 @@ nameOne = "PRB1 Ground Truth"
 # name of operator mission PMD Report for analysis
 nameTwo = "Soto MSN09"
 
-nameThree = "Example"
+nameThree = "TESTSVP"
 
 # name of output file
 outputName = "Horizontal CLA"
@@ -22,4 +22,6 @@ listTwo = formatter.coinContactFormatter( nameTwo)
 # build output comparison from target lists
 formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
 
-formatter.contactParser(nameTwo)
+#formatter.contactParser(nameTwo)
+
+formatter.ctdParser(nameThree)

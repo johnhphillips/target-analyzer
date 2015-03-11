@@ -177,24 +177,50 @@ def contactParser( fileName):
 
             if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}CaseDepth':
                 print attribute.text + ' ' + attribute.attrib['units']
-
+                
+        break
     
-#     # Open the file 
-#     f = open(fileName, 'r')
-#     # Read line 1
-#     line = f.readline()
-#     while line:
-#         parts = line.split()
-#         # check for contact tag
-#         if parts[0] == "<TacticalContact":
-#             print parts[0]
-#             line = f.readline()
-#             # check for CRN
-#             print line
-#         line = f.readline()
-# #    while line:
-# #        print line
-# #        line = file.readline()
-#         
-#     # Close the file
-#     f.close()
+# function for parsing Neil Brown CTD CSV file (ascent or decent removed by hand)
+def ctdParser( fileName):
+    # extension of input file, csv
+    fileName = fileName + ".CSV"
+    
+    meter2feet = 3.28084
+        
+    # open file
+    file = open( fileName, 'r')
+    # empty list
+    rows = []
+        
+    for line in file:
+        row = []
+        currentRow = line.split(',')
+        lat = currentRow[0]
+        row.append(lat)
+        lon = currentRow[1]
+        row.append(lon)
+        depth = currentRow[3]
+        row.append(depth)
+        salinity = currentRow[6]
+        row.append(salinity)
+        temperature = currentRow[5]
+        row.append(temperature)
+        soundSpeed = currentRow[7]
+        row.append(soundSpeed)
+        
+        rows.append(row)
+        
+    count = 0    
+    for row in rows: 
+        if count == 0:
+            count = count + 1
+            continue
+        print "<SoundVelocityProfile>"
+        print "<Depth units=\"ft\">" + str(float(row[2]) * meter2feet) + "</Depth>"
+        print "<Salinity units=\"ppt\">" + row[3] + "</Salinity>"
+        print "<WaterTemperature units=\"Fahrenheit\">" + str(float(row[4]) * 1.8 + 32) + "</WaterTemperature>"
+        print "<SoundSpeed units=\"ft/s\">" + str(float(row[5]) * meter2feet) + "</SoundSpeed>"
+        print "</SoundVelocityProfile>"
+        
+        
+        
