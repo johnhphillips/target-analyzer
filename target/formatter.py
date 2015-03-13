@@ -182,19 +182,32 @@ def contactParser( fileName):
     
 # function for parsing Neil Brown CTD CSV file (ascent or decent removed by hand)
 def ctdParser( fileName):
+    from time import localtime
+    # extension of output file, XML
+    outputName = fileName + ".XML"
     # extension of input file, csv
-    fileName = fileName + ".CSV"
+    inputName = fileName + ".CSV"
     
     meter2feet = 3.28084
-        
+      
+    # build timestamp    
+    currentTime = localtime() 
+    date = str(currentTime[0]) + "-" + str('%02.d' % currentTime[1]) + "-" + str('%02.d' % currentTime[2])
+    times =  "T" + str('%02.d' % currentTime[3]) + ":" + str('%02.d' % currentTime[4]) + ":" + str('%02.d' % currentTime[5]) +".000-08:00" 
+    timeStamp = date + times
+    
     # open file
-    file = open( fileName, 'r')
-    # empty list
+    file = open( inputName, 'r')
+    # empty list of rows
     rows = []
         
     for line in file:
+        # empty row of attributes
         row = []
+        
         currentRow = line.split(',')
+        
+        #TODO: search for appropriate attribute column
         lat = currentRow[0]
         row.append(lat)
         lon = currentRow[1]
@@ -218,20 +231,52 @@ def ctdParser( fileName):
     
     radius = haversine(startLat, startLon, endLat, endLon)
     
-    print radius
+    # create / open output file in write mode
+    fout = open(outputName, 'w')
     
-    count = 0    
+    fout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+    fout.write("<Miw xmlns=\"http://www.saic.com/navy/miwml.1.0\">")
+    fout.write("<MessageHeader>")
+    fout.write("<MessageSource>COINv2</MessageSource>")
+    fout.write("<Timestamp>" + timeStamp + "</Timestamp>")
+    fout.write("<Classification>")
+    fout.write("<ClassificationLevel>UNCLASSIFIED</ClassificationLevel>")
+    fout.write("</Classification>")
+    fout.write("</MessageHeader>")
+    fout.write("<EnvironmentList>")
+    fout.write("<PhysicalProperties environment_id=\"env_000\">")
+    fout.write("<Position><Latitude units=\"degrees\">" + str(startLat) + "</Latitude>")
+    fout.write("<Longitude units=\"degrees\">" + str(startLon) + "</Longitude>")
+    fout.write("</Position>")
+    fout.write("<Observation>" + timeStamp + "</Observation>")
+    fout.write("<CircleRegion>")
+    fout.write("<RegionName>" + fileName + "</RegionName>")
+    fout.write("<CircleGeometry>")
+    fout.write("<Position>")
+    fout.write("<Latitude units=\"degrees\">" + str(startLat) + "</Latitude>")
+    fout.write("<Longitude units=\"degrees\">" + str(startLon) + "</Longitude>")
+    fout.write("</Position>")
+    fout.write("<Radius units=\"ft\">" + str(radius * meter2feet) + "</Radius>")
+    fout.write("</CircleGeometry>")
+    fout.write("</CircleRegion>")  
+    
+    # add environmental data to XML file
+    count = 0 
     for row in rows: 
         # skip header (first) row
         if count == 0:
             count = count + 1
             continue
-        print "<SoundVelocityProfile>"
-        print "<Depth units=\"ft\">" + str(float(row[2]) * meter2feet) + "</Depth>"
-        print "<Salinity units=\"ppt\">" + row[3] + "</Salinity>"
-        print "<WaterTemperature units=\"Fahrenheit\">" + str(float(row[4]) * 1.8 + 32) + "</WaterTemperature>"
-        print "<SoundSpeed units=\"ft/s\">" + str(float(row[5]) * meter2feet) + "</SoundSpeed>"
-        print "</SoundVelocityProfile>"
+        fout.write("<SoundVelocityProfile>")
+        fout.write("<Depth units=\"ft\">" + str(float(row[2]) * meter2feet) + "</Depth>")
+        fout.write("<Salinity units=\"ppt\">" + row[3] + "</Salinity>")
+        fout.write("<WaterTemperature units=\"Fahrenheit\">" + str(float(row[4]) * 1.8 + 32) + "</WaterTemperature>")
+        fout.write("<SoundSpeed units=\"ft/s\">" + str(float(row[5]) * meter2feet) + "</SoundSpeed>")
+        fout.write("</SoundVelocityProfile>")
         
-        
+    fout.write("</PhysicalProperties>")
+    fout.write("</EnvironmentList>")
+    fout.write("</Miw>")
+    
+    fout.close()
         

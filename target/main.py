@@ -9,7 +9,7 @@ nameOne = "PRB1 Ground Truth"
 # name of operator mission PMD Report for analysis
 nameTwo = "Soto MSN09"
 
-nameThree = "TESTSVP"
+nameThree = "Mission 1 06274 002 Ascent"
 
 # name of output file
 outputName = "Horizontal CLA"
