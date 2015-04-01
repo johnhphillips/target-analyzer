@@ -4,10 +4,10 @@ import formatter
 maxDist = 40
 
 # name of ground truth PMD Report 
-groundTruth = "Mission 1"
+groundTruth = "GroundTruth"
 
 # name of operator mission PMD Report for analysis
-missionOne = "M2"
+missionOne = "TargetCalls"
 
 nameThree = "Mission 1 06274 002 Ascent"
 

@@ -62,14 +62,21 @@ def contactLocalization( missionOne, missionTwo, maxDist, outputName):
             if horzDist < maxDist:
                 # increment matches
                 matches = matches + 1
-                # find vertical distance with ground truth at 0
-                vertDist = a[5] - b[5]
-                # square both
-                h2 = pow(horzDist, 2)
-                h2Total = h2Total + h2
+                # check that depth is present for ground truth
                 
-                v2 = pow(vertDist, 2)
-                v2Total = v2Total + v2
+                if len(a) == 6:
+                    # find vertical distance with ground truth at 0
+                    vertDist = a[5] - b[5]
+                    v2 = pow(vertDist, 2)
+                    v2Total = v2Total + v2
+                    
+                else:
+                    vertDist = 1
+                    v2 = 1
+                    v2Total = 1
+                                
+                h2 = pow(horzDist, 2)
+                h2Total = h2Total + h2         
                 
                 fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + 
                            str(b[3]) + "," + str(a[1]) + "," + str(horzDist) + "," + 
