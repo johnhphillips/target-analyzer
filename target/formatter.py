@@ -202,6 +202,7 @@ def ctdParser( fileName):
     # create / open output file in write mode
     fout = open(outputName, 'w')
     
+    # add header information to XML file
     fout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
     fout.write("<Miw xmlns=\"http://www.saic.com/navy/miwml.1.0\">")
     fout.write("<MessageHeader>")

@@ -22,7 +22,7 @@ listTwo = formatter.contactParser(missionOne)
 
 #formatter.printContacts(listOne) 
 
-formatter.printContacts(listTwo)
+#formatter.printContacts(listTwo)
 
 # build output comparison from target lists
 formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
