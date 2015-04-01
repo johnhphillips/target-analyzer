@@ -71,7 +71,10 @@ def contactLocalization( missionOne, missionTwo, maxDist, outputName):
                 v2 = pow(vertDist, 2)
                 v2Total = v2Total + v2
                 
-                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + str(b[3]) + "," + str(a[1]) + "," + str(horzDist) + "," + str(vertDist) + "," + str(h2) + ",," + str(v2) + "\n")
+                fout.write(str(b[0]) + "," + str(b[1]) + "," + str(b[2]) + "," + 
+                           str(b[3]) + "," + str(a[1]) + "," + str(horzDist) + "," + 
+                           str(vertDist) + "," + str(h2) + ",," + str(v2) + "\n")
+                
     hCLA = sqrt(h2Total / matches)
     vCLA = sqrt(v2Total / matches)
            
@@ -127,7 +130,7 @@ def contactParser( fileName):
             if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}Longitude':
                 #TODO: Add attribute units check
                 contact.append(float(attribute.text))
-                print attribute.attrib['units']
+#                print attribute.attrib['units']
                 
             if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}ContactKind':
                 contact.append(attribute.text)
