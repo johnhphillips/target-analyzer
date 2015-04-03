@@ -255,4 +255,33 @@ def ctdParser( fileName):
     fout.write("</Miw>")
     
     fout.close()
+    
+def vipOutput( targets, outputName):
+    # extension of VIP local waypoint file
+    vipEx = ".ini"
+    outputName = outputName + vipEx
+    # create / open output file in write mode
+    fout = open(outputName, "w")
+    for a in targets:
+        # Field Location Label
+        fout.write("#" + a[0] + "\n")
+        fout.write("[Location]" + "\n")
+        fout.write("Label=" + a[1] + "\n")
+        # check for LAT sign and format
+        if a[2] > 0:
+            lat = "%.5f" % a[2] + "N"
+        elif a[2] < 0:
+            temp = a[2] * -1
+            lat = "%.5f" % -1 * temp + "S"
+        # check of LONG sign and format
+        if a[3] > 0:
+            lon = "%.5f" % a[3] + "E"
+        elif a[3] < 0:
+            temp = a[3] * -1
+            lon = "%.5f" % temp + "W"
+        fout.write("Position=" + lat + " " + lon + "\n")
+        fout.write("Offset direction=0.0" + "\n")
+        fout.write("Offset distance (Meters)=" + "\n")
+        fout.write("Offset Y axis (Meters)=" + "\n" + "\n")
+    fout.close()
         

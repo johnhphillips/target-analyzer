@@ -4,7 +4,7 @@ import formatter
 maxDist = 40
 
 # name of ground truth PMD Report 
-groundTruth = "GroundTruth"
+groundTruth = "VxWorks FAT Region"
 
 # name of operator mission PMD Report for analysis
 missionOne = "TargetCalls"
@@ -18,15 +18,17 @@ outputName = "CLA"
 listOne = formatter.contactParser(groundTruth)
 
 # build contact list from mission XML file
-listTwo = formatter.contactParser(missionOne)
+#listTwo = formatter.contactParser(missionOne)
 
-#formatter.printContacts(listOne) 
+formatter.printContacts(listOne) 
 
 #formatter.printContacts(listTwo)
 
 # build output comparison from target lists
-formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
+#formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
 
 #formatter.contactParser(nameTwo)
 
 #formatter.ctdParser(nameThree)
+
+formatter.vipOutput(listOne, "VxWorks")
