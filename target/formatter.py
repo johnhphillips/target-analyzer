@@ -1,4 +1,5 @@
 from math import radians, sin, cos, asin, sqrt, pow
+from myattributes import *
 import xml.etree.cElementTree as ET
 
 # TODO: Add exception handling
@@ -116,34 +117,34 @@ def contactParser( fileName):
     
     message = ET.ElementTree(file=fileName)
     
-    for tContact in message.iter(tag='{http://www.saic.com/navy/miwml.1.0}TacticalContact'):
+    for tContact in message.iter(tag = XML_contact):
         # list to hold contact attributes
         contact = []
         
         for attribute in tContact.iter():
             
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}TacticalContact':
+            if attribute.tag == XML_contact:
                 # add ID to contact attribute list
-                contact.append(str(attribute.attrib['contact_id']))
+                contact.append(str(attribute.attrib[XML_contact_id]))
                 
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}CRN':
+            if attribute.tag == XML_contact_crn:
                 # add CRN to contact attribute list
                 contact.append(attribute.text)
                 
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}Latitude':
+            if attribute.tag == XML_contact_lat:
                 #TODO: Add attribute units check
                 contact.append(float(attribute.text))
 
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}Longitude':
+            if attribute.tag == XML_contact_lon:
                 #TODO: Add attribute units check
                 contact.append(float(attribute.text))
 #                print attribute.attrib['units']
                 
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}ContactKind':
+            if attribute.tag == XML_contact_kind:
                 contact.append(attribute.text)
 
-            if attribute.tag == '{http://www.saic.com/navy/miwml.1.0}CaseDepth':
-                if attribute.attrib['units'] == 'ft':
+            if attribute.tag == XML_contact_depth:
+                if attribute.attrib[XML_contact_depth_units] == 'ft':
                     depth = float(attribute.text) * ft2m
                     contact.append(depth)
                     
@@ -210,31 +211,34 @@ def ctdParser( fileName):
     fout = open(outputName, 'w')
     
     # add header information to XML file
-    fout.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    fout.write("<Miw xmlns=\"http://www.saic.com/navy/miwml.1.0\">")
-    fout.write("<MessageHeader>")
-    fout.write("<MessageSource>COINv2</MessageSource>")
-    fout.write("<Timestamp>" + timeStamp + "</Timestamp>")
-    fout.write("<Classification>")
-    fout.write("<ClassificationLevel>UNCLASSIFIED</ClassificationLevel>")
-    fout.write("</Classification>")
-    fout.write("</MessageHeader>")
-    fout.write("<EnvironmentList>")
-    fout.write("<PhysicalProperties environment_id=\"env_000\">")
-    fout.write("<Position><Latitude units=\"degrees\">" + str(startLat) + "</Latitude>")
-    fout.write("<Longitude units=\"degrees\">" + str(startLon) + "</Longitude>")
-    fout.write("</Position>")
-    fout.write("<Observation>" + timeStamp + "</Observation>")
-    fout.write("<CircleRegion>")
-    fout.write("<RegionName>" + fileName + "</RegionName>")
-    fout.write("<CircleGeometry>")
-    fout.write("<Position>")
-    fout.write("<Latitude units=\"degrees\">" + str(startLat) + "</Latitude>")
-    fout.write("<Longitude units=\"degrees\">" + str(startLon) + "</Longitude>")
-    fout.write("</Position>")
-    fout.write("<Radius units=\"ft\">" + str(radius * meter2feet) + "</Radius>")
-    fout.write("</CircleGeometry>")
-    fout.write("</CircleRegion>")  
+    fout.write(XML_version)
+    fout.write(XML_open_miw)
+    fout.write(XML_open_header)
+    fout.write(XML_source)
+    fout.write(XML_open_timestamp + timeStamp + XML_close_timestamp)
+    fout.write(XML_open_classification)
+    fout.write(XML_classification_level)
+    fout.write(XML_close_classification)
+    fout.write(XML_close_header)
+    
+    fout.write(XML_open_environment)
+    fout.write(XML_open_properties)
+    fout.write(XML_open_position)
+    fout.write(XML_open_lat + str(startLat) + XML_close_lat)
+    fout.write(XML_open_lon + str(startLon) + XML_close_lon)
+    fout.write(XML_close_position)
+    fout.write(XML_open_observ + timeStamp + XML_close_observ)
+    
+    fout.write(XML_open_circle_region)
+    fout.write(XML_open_region_name + fileName + XML_close_region_name)
+    fout.write(XML_open_circle_geo)
+    fout.write(XML_open_position)
+    fout.write(XML_open_lat + str(startLat) + XML_close_lat)
+    fout.write(XML_open_lon + str(startLon) + XML_close_lon)
+    fout.write(XML_close_position)
+    fout.write(XML_open_radius + str(radius * meter2feet) + XML_close_radius)
+    fout.write(XML_close_circle_geo)
+    fout.write(XML_close_circle_region)  
     
     # add environmental data to XML file
     count = 0 
@@ -243,16 +247,16 @@ def ctdParser( fileName):
         if count == 0:
             count = count + 1
             continue
-        fout.write("<SoundVelocityProfile>")
-        fout.write("<Depth units=\"ft\">" + str(float(row[2]) * meter2feet) + "</Depth>")
-        fout.write("<Salinity units=\"ppt\">" + row[3] + "</Salinity>")
-        fout.write("<WaterTemperature units=\"Fahrenheit\">" + str(float(row[4]) * 1.8 + 32) + "</WaterTemperature>")
-        fout.write("<SoundSpeed units=\"ft/s\">" + str(float(row[5]) * meter2feet) + "</SoundSpeed>")
-        fout.write("</SoundVelocityProfile>")
+        fout.write(XML_open_SVP)
+        fout.write(XML_open_depth + str(float(row[2]) * meter2feet) + XML_close_depth)
+        fout.write(XML_open_salinity + row[3] + XML_close_salinity)
+        fout.write(XML_open_water_temp + str(float(row[4]) * 1.8 + 32) + XML_close_water_temp)
+        fout.write(XML_open_sound_speed + str(float(row[5]) * meter2feet) + XML_close_sound_speed)
+        fout.write(XML_close_SVP)
         
-    fout.write("</PhysicalProperties>")
-    fout.write("</EnvironmentList>")
-    fout.write("</Miw>")
+    fout.write(XML_close_properties)
+    fout.write(XML_close_environment)
+    fout.write(XML_close_miw)
     
     fout.close()
     
