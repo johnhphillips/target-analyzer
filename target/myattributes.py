@@ -56,3 +56,17 @@ XML_open_radius = '<Radius units=\"ft\">'
 XML_close_radius = '</Radius>'
 XML_close_circle_geo = '</CircleGeometry>'
 XML_close_circle_region = '</CircleRegion>'
+
+# variables associated with building VIP waypoint output
+VIP_comment = '#'
+VIP_location = '[Location]'
+VIP_label = 'Label='
+VIP_position = 'Position='
+VIP_offset_direction = 'Offset direction=0.0'
+VIP_offset_distance = 'Offset distance (Meters)='
+VIP_offset_Y = 'Offset Y axis (Meters)='
+
+
+
+
+

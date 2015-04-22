@@ -1,34 +1,34 @@
 import formatter
 
 # max threshold distance between target and ground truth to state they are the same (m)
-maxDist = 40
+max_dist = 40
 
 # name of ground truth PMD Report 
-groundTruth = "VxWorks FAT Region"
+ground_truth = "VxWorks FAT Region"
 
 # name of operator mission PMD Report for analysis
-missionOne = "TargetCalls"
+mission_one = "TargetCalls"
 
-nameThree = "Mission 1 06274 002 Ascent"
+name_three = "Mission 1 06274 002 Ascent"
 
 # name of output file
-outputName = "CLA"
+output_name = "CLA"
 
 # build ground truth list from input XML file
-listOne = formatter.contactParser(groundTruth)
+list_one = formatter.contact_parser(ground_truth)
 
 # build contact list from mission XML file
-#listTwo = formatter.contactParser(missionOne)
+#list_two = formatter.contact_parser(mission_one)
 
-formatter.printContacts(listOne) 
+formatter.print_contacts(list_one) 
 
-#formatter.printContacts(listTwo)
+#formatter.print_contacts(list_two)
 
 # build output comparison from target lists
-#formatter.contactLocalization( listOne, listTwo, maxDist, outputName)
+#formatter.contact_localization(list_one, list_two, max_dist, output_name)
 
-#formatter.contactParser(nameTwo)
+#formatter.contact_parser(name_two)
 
-#formatter.ctdParser(nameThree)
+#formatter.ctd_parser(name_three)
 
-formatter.vipOutput(listOne, "VxWorks")
+formatter.vip_output(list_one, "VxWorks")
