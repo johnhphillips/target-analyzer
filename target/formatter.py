@@ -1,4 +1,4 @@
-from math import radians, sin, cos, asin, sqrt, pow
+from math import radians, sin, cos, asin, sqrt, pow, atan2, degrees
 from myattributes import *
 import xml.etree.cElementTree as ET
 
@@ -27,6 +27,31 @@ def haversine(lat_1, long_1, lat_2, long_2):
 
     m = EARTH_RADIUS * c
     return m 
+
+# function that returns destination point on earth
+# given start point, bearing, distance (decimal degrees,
+# decimal degrees, meters)
+def end_point(lat_1, long_1, bearing, distance):
+    # in meters
+    EARTH_RADIUS = 6378100.
+    
+    # convert decimal degrees to radians 
+    lat_1 = radians(lat_1)
+    long_1 = radians(long_1)
+    bearing = radians(bearing)
+    print bearing
+    
+    # find destination point
+    lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
+    long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
+    
+    
+    
+    lat_2 = degrees(lat_2)
+    long_2 = degrees(long_2)
+    
+    return (lat_2, long_2)
+
 
 # function to print contact list with attributes to console 
 # for debugging

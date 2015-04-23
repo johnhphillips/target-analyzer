@@ -15,12 +15,12 @@ name_three = "Mission 1 06274 002 Ascent"
 output_name = "CLA"
 
 # build ground truth list from input XML file
-list_one = formatter.contact_parser(ground_truth)
+#list_one = formatter.contact_parser(ground_truth)
 
 # build contact list from mission XML file
 #list_two = formatter.contact_parser(mission_one)
 
-formatter.print_contacts(list_one) 
+#formatter.print_contacts(list_one) 
 
 #formatter.print_contacts(list_two)
 
@@ -31,4 +31,7 @@ formatter.print_contacts(list_one)
 
 #formatter.ctd_parser(name_three)
 
-formatter.vip_output(list_one, "VxWorks")
+#formatter.vip_output(list_one, "VxWorks")
+
+temp = formatter.end_point(0, 0, 90, 10000)
+print temp
