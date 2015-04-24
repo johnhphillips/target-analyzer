@@ -39,7 +39,6 @@ def end_point(lat_1, long_1, bearing, distance):
     lat_1 = radians(lat_1)
     long_1 = radians(long_1)
     bearing = radians(bearing)
-    print bearing
     
     # find destination point
     lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
@@ -51,6 +50,12 @@ def end_point(lat_1, long_1, bearing, distance):
     long_2 = degrees(long_2)
     
     return (lat_2, long_2)
+
+def coord_formatter(lat_1, long_1):
+    
+    
+    temp = '%.5f' % lat_1
+    print type(temp)
 
 
 # function to print contact list with attributes to console 
