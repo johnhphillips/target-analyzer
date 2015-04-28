@@ -33,5 +33,5 @@ output_name = "CLA"
 
 #formatter.vip_output(list_one, "VxWorks")
 
-temp = formatter.end_point(0, 0, 90, 10000)
+temp = formatter.end_point(32.56203, -117.11458, 300, 15000)
 print temp
