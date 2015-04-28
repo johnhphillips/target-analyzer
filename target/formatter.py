@@ -34,22 +34,41 @@ def haversine(lat_1, long_1, lat_2, long_2):
 def end_point(lat_1, long_1, bearing, distance):
     # in meters
     EARTH_RADIUS = 6378100.
+    epsilon = 0.00002
+    is_negative = False
     
     # convert decimal degrees to radians 
     lat_1 = radians(lat_1)
     long_1 = radians(long_1)
+    if long_1 < 0:
+        is_negative = True
+        long_1 = long_1 * -1
+    
     bearing = radians(bearing)
-    print bearing
     
     # find destination point
     lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
     long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
     
-    
+    #long_2 = (long_2 + 3 * pi) % (2 * pi) - pi
     
     lat_2 = degrees(lat_2)
+    
+    if lat_2 - lat_1 < epsilon:
+        lat_2 = lat_1
+        
+    lat_2 = round(lat_2, 5)
+    
     long_2 = degrees(long_2)
     
+    if long_2 - long_1 < epsilon:
+        long_2 = long_1
+        
+    long_2 = round(long_2, 5)
+    
+    if is_negative == True:
+        long_2 = long_2 * -1
+        
     return (lat_2, long_2)
 
 
