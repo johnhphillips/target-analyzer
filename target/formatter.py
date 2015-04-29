@@ -3,15 +3,20 @@ from myattributes import *
 import xml.etree.cElementTree as ET
 
 # TODO: Add exception handling
-# TODO: Change into contact class
-# TODO: Add constants to top
-# TODO: Move CTD parsing to new class (svp)
+# TODO: Move contact functions into contact class
+# TODO: Move CTD parsing to ssp class
+
+EARTH_RADIUS = 6378100.
+EPSILON = 0.00002
+
+FEET_TO_METERS = 0.3048
+METERS_TO_FEET = 3.28084
 
 # function that returns great circle distance between two
 # points on the earth (input must be in decimal degrees)
-def haversine(lat_1, long_1, lat_2, long_2):
+def _haversine(lat_1, long_1, lat_2, long_2):
     # in meters
-    EARTH_RADIUS = 6378100
+    
     
     # convert decimal degrees to radians 
     lat_1 = radians(lat_1)
@@ -23,20 +28,33 @@ def haversine(lat_1, long_1, lat_2, long_2):
     d_long = long_2 - long_1 
     d_lat = lat_2 - lat_1 
     a = sin(d_lat/2)**2 + cos(lat_1) * cos(lat_2) * sin(d_long/2)**2
-    c = 2 * asin(sqrt(a)) 
-
+    c = 2 * asin(sqrt(a))  
+    
     m = EARTH_RADIUS * c
     return m 
 
+# helper function that returns angular distance given distance; 
+# distance is assumed to be in meters
+def _angular_distance(distance):
+    return distance / EARTH_RADIUS
+
+# helper function that check if given coordinate pair are different
+# using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
+# be in decimal degrees and decimal degrees input 
+def _coord_check(coord_1, coord_2):  
+    if coord_2 - coord_1 < EPSILON:
+        coord_2 = coord_1
+
+    coord_2 = round(coord_2, 5)
+    return coord_2
+
 # function that returns destination point on earth
-# given start point, bearing, distance (decimal degrees,
-# decimal degrees, meters)
-def end_point(lat_1, long_1, bearing, distance):
-    # in meters
-    EARTH_RADIUS = 6378100.
-    epsilon = 0.00002
-    is_negative = False
+# given start lat, long, bearing, and distance; 
+# assumed to be decimal degrees, decimal degrees, degrees
+# and meters input
+def end_point(lat_1, long_1, bearing, distance): 
     
+    is_negative = False 
     # convert decimal degrees to radians 
     lat_1 = radians(lat_1)
     long_1 = radians(long_1)
@@ -45,26 +63,18 @@ def end_point(lat_1, long_1, bearing, distance):
         long_1 = long_1 * -1
     
     bearing = radians(bearing)
-    
     # find destination point
     lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
     long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
     
-    #long_2 = (long_2 + 3 * pi) % (2 * pi) - pi
     
     lat_2 = degrees(lat_2)
     
-    if lat_2 - lat_1 < epsilon:
-        lat_2 = lat_1
-        
-    lat_2 = round(lat_2, 5)
+    lat_2 = _coord_check(lat_1, lat_2)    
     
     long_2 = degrees(long_2)
     
-    if long_2 - long_1 < epsilon:
-        long_2 = long_1
-        
-    long_2 = round(long_2, 5)
+    long_2 = _coord_check(long_1, long_2)
     
     if is_negative == True:
         long_2 = long_2 * -1
@@ -103,7 +113,7 @@ def contact_localization(mission_one, mission_two, max_dist, file_name):
     
     for a in mission_one:
         for b in mission_two:
-            horz_dist = haversine(a[2], a[3], b[2], b[3])
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
             if horz_dist < max_dist:
                 # increment matches
                 matches = matches + 1
@@ -139,7 +149,7 @@ def contact_localization(mission_one, mission_two, max_dist, file_name):
     for a in mission_two:
         present = False
         for b in mission_one:
-            horz_dist = haversine(a[2], a[3], b[2], b[3])
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
             if horz_dist < max_dist:
                 present = True
         if present == False:
@@ -152,9 +162,6 @@ def contact_localization(mission_one, mission_two, max_dist, file_name):
 def contact_parser(file_name):
     # extension of input file, XML
     input_name = file_name + ".xml"
-    
-    FEET_TO_METERS = 0.3048
-    METERS_TO_FEET = 3.28084
     
     # list to hold targets
     contacts = []
@@ -251,7 +258,7 @@ def ctd_parser(file_name):
     end_lat = float(rows[len(rows) - 1][0])
     end_lon = float(rows[len(rows) - 1][1])
     
-    radius = haversine(start_lat, start_lon, end_lat, end_lon)
+    radius = _haversine(start_lat, start_lon, end_lat, end_lon)
     
     # create / open output file in write mode
     fout = open(output_name, 'w')
@@ -340,4 +347,4 @@ def vip_output(contacts, file_name):
         fout.write('\n') 
         
     fout.close()
-        
+    
