@@ -12,6 +12,9 @@ EPSILON = 0.00002
 FEET_TO_METERS = 0.3048
 METERS_TO_FEET = 3.28084
 
+# extension of VIP local waypoint file
+VIP_EXTENSION = '.ini'
+
 # function that returns great circle distance between two
 # points on the earth (input must be in decimal degrees)
 def _haversine(lat_1, long_1, lat_2, long_2):
@@ -53,7 +56,6 @@ def _coord_check(coord_1, coord_2):
 # assumed to be decimal degrees, decimal degrees, degrees
 # and meters input
 def end_point(lat_1, long_1, bearing, distance): 
-    
     is_negative = False 
     # convert decimal degrees to radians 
     lat_1 = radians(lat_1)
@@ -66,7 +68,10 @@ def end_point(lat_1, long_1, bearing, distance):
     # find destination point
     lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
     long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
-    
+    a = _angular_distance(distance)
+    # find destination point
+    lat_2 = asin(sin(lat_1) * cos(a) + cos(lat_1) * sin(a) * cos(bearing))
+    long_2 = long_1 + atan2(sin(bearing) * sin(a) * cos(lat_1), cos(a) - sin(lat_1) * sin(lat_2))
     
     lat_2 = degrees(lat_2)
     
@@ -97,9 +102,7 @@ def print_contacts(contacts):
 # mission) and writing output to csv file
 
 # TODO: extend to any number of missions (list of contact lists as input)
-def contact_localization(mission_one, mission_two, max_dist, file_name):
-    # extension of output file, csv
-    output_name = file_name + ".csv"
+def contact_localization(mission_one, mission_two, max_dist, output_name):
     # create / open output file in write mode
     fout = open(output_name, 'w')
     
@@ -159,10 +162,8 @@ def contact_localization(mission_one, mission_two, max_dist, file_name):
     fout.close()
     
 # function for parsing contact XML file
-def contact_parser(file_name):
-    # extension of input file, XML
-    input_name = file_name + ".xml"
-    
+
+def contact_parser(input_name):  
     # list to hold targets
     contacts = []
     
@@ -216,7 +217,7 @@ def ctd_parser(file_name):
     input_name = file_name + ".csv"
     
     METERS_TO_FEET = 3.28084
-      
+
     # build timestamp    
     current_time = localtime() 
     date = str(current_time[0]) + "-" + str('%02.d' % current_time[1]) + "-" + str('%02.d' % current_time[2])
@@ -316,7 +317,7 @@ def ctd_parser(file_name):
 def vip_output(contacts, file_name):
     # extension of VIP local waypoint file
     VIP_extension = '.ini'
-    output_name = file_name + VIP_extension
+    output_name = file_name + VIP_EXTENSION
     # create / open output file in write mode
     fout = open(output_name, 'w')
     
