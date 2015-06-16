@@ -97,7 +97,9 @@ def print_contacts(contacts):
 # mission) and writing output to csv file
 
 # TODO: extend to any number of missions (list of contact lists as input)
-def contact_localization(mission_one, mission_two, max_dist, output_name):
+def contact_localization(mission_one, mission_two, max_dist, file_name):
+    # extension of output file, csv
+    output_name = file_name + ".csv"
     # create / open output file in write mode
     fout = open(output_name, 'w')
     
@@ -157,7 +159,9 @@ def contact_localization(mission_one, mission_two, max_dist, output_name):
     fout.close()
     
 # function for parsing contact XML file
-def contact_parser(input_name):
+def contact_parser(file_name):
+    # extension of input file, XML
+    input_name = file_name + ".xml"
     
     # list to hold targets
     contacts = []
