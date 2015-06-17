@@ -3,3 +3,7 @@
 *.ini
 *.xml
 *.txt
+
+build
+dist
+target/setup.py

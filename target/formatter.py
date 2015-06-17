@@ -1,6 +1,6 @@
 from math import radians, sin, cos, asin, sqrt, pow, atan2, degrees
 from myattributes import *
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 # TODO: Add exception handling
 # TODO: Move contact functions into contact class

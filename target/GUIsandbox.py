@@ -2,6 +2,9 @@ from Tkinter import *
 
 import tkMessageBox
 import tkFileDialog
+
+from subprocess import Popen
+
 import formatter
 
 # max threshold distance between target and ground truth to state they are the same (m)
@@ -42,6 +45,7 @@ def analyze_files():
     # build contact list from contact XML file
     list_two = formatter.contact_parser(input_file)
     formatter.contact_localization(list_one, list_two, MAX_DIST, output_file)
+    p = Popen(output_file, shell=True)
 
 def open_groundtruth():
     filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
