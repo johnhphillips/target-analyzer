@@ -145,6 +145,7 @@ def contact_localization(mission_one, mission_two, max_dist, output_name):
            
     fout.write(',,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
     fout.write('\n')
+    print std(horz_cla)
     
     # Print false alarms 
     fout.write('False alarms\n')
