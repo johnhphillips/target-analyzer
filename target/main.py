@@ -1,13 +1,14 @@
-import formatter
+from target import analyzer
+import math
 
 # max threshold distance between target and ground truth to state they are the same (m)
 max_dist = 40
 
 # name of ground truth PMD Report 
-ground_truth = "VxWorks FAT Region"
+ground_truth = "Mission 1.xml"
 
 # name of operator mission PMD Report for analysis
-mission_one = "TargetCalls"
+mission_one = "M2.xml"
 
 name_three = "Mission 1 06274 002 Ascent"
 
@@ -15,23 +16,32 @@ name_three = "Mission 1 06274 002 Ascent"
 output_name = "CLA"
 
 # build ground truth list from input XML file
-#list_one = formatter.contact_parser(ground_truth)
+list_one = analyzer.contact_parser(ground_truth)
 
 # build contact list from mission XML file
-#list_two = formatter.contact_parser(mission_one)
+list_two = analyzer.contact_parser(mission_one)
 
-#formatter.print_contacts(list_one) 
+#analyzer.print_contacts(list_one) 
 
-#formatter.print_contacts(list_two)
+#analyzer.print_contacts(list_two)
 
 # build output comparison from target lists
-#formatter.contact_localization(list_one, list_two, max_dist, output_name)
+analyzer.contact_localization(list_one, list_two, max_dist, output_name)
 
-#formatter.contact_parser(name_two)
 
-#formatter.ctd_parser(name_three)
+temp = analyzer.end_point(32.56203, -117.11458, 300, 15000)
+#print temp[0]
+#print temp[1]
 
-#formatter.vip_output(list_one, "VxWorks")
+s = [2,4,4,4,5,5,7,9]
+def average(s): return sum(s) * 1.0 / len(s)
+ 
+avg = average(s)
+print avg
+variance = map(lambda x: (x - avg)**2, s)
+print variance
 
-temp = formatter.end_point(32.56203, -117.11458, 300, 15000)
-print temp
+print (average(variance))
+
+standard_deviation = math.sqrt(average(variance))
+print standard_deviation

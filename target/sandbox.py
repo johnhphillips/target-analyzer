@@ -1,6 +1,149 @@
 import xlrd
 import os
 import win32com.client
+from myattributes import *
+from target.analyzer import _haversine
+
+# function for parsing Neil Brown CTD csv file (ascent or decent removed by hand)
+def ctd_parser(file_name):
+    from time import localtime
+    # extension of output file, XML
+    output_name = file_name + ".xml"
+    # extension of input file, csv
+    input_name = file_name + ".csv"
+    
+    METERS_TO_FEET = 3.28084
+
+    # build timestamp    
+    current_time = localtime() 
+    date = str(current_time[0]) + "-" + str('%02.d' % current_time[1]) + "-" + str('%02.d' % current_time[2])
+    times =  "T" + str('%02.d' % current_time[3]) + ":" + str('%02.d' % current_time[4]) + ":" + str('%02.d' % current_time[5]) +".000-08:00" 
+    time_stamp = date + times
+    
+    # open file
+    file = open(input_name, 'r')
+    # empty list of rows
+    rows = []
+        
+    for line in file:
+        # empty row of attributes
+        row = []
+        
+        current_row = line.split(',')
+        
+        #TODO: search for appropriate attribute column
+        lat = current_row[0]
+        row.append(lat)
+        lon = current_row[1]
+        row.append(lon)
+        depth = current_row[3]
+        row.append(depth)
+        salinity = current_row[6]
+        row.append(salinity)
+        temperature = current_row[5]
+        row.append(temperature)
+        sound_speed = current_row[7]
+        row.append(sound_speed)
+        
+        rows.append(row)
+        
+    file.close()
+    
+    # grab start and end lat/lon    
+    start_lat = float(rows[1][0])
+    start_lon = float(rows[1][1])
+    end_lat = float(rows[len(rows) - 1][0])
+    end_lon = float(rows[len(rows) - 1][1])
+    
+    radius = _haversine(start_lat, start_lon, end_lat, end_lon)
+    
+    # create / open output file in write mode
+    fout = open(output_name, 'w')
+    
+    # add header information to XML file
+    fout.write(XML_version)
+    fout.write(XML_open_miw)
+    fout.write(XML_open_header)
+    fout.write(XML_source)
+    fout.write(XML_open_timestamp + time_stamp + XML_close_timestamp)
+    fout.write(XML_open_classification)
+    fout.write(XML_classification_level)
+    fout.write(XML_close_classification)
+    fout.write(XML_close_header)
+    
+    fout.write(XML_open_environment)
+    fout.write(XML_open_properties)
+    fout.write(XML_open_position)
+    fout.write(XML_open_lat + str(start_lat) + XML_close_lat)
+    fout.write(XML_open_lon + str(start_lon) + XML_close_lon)
+    fout.write(XML_close_position)
+    fout.write(XML_open_observ + time_stamp + XML_close_observ)
+    
+    fout.write(XML_open_circle_region)
+    fout.write(XML_open_region_name + file_name + XML_close_region_name)
+    fout.write(XML_open_circle_geo)
+    fout.write(XML_open_position)
+    fout.write(XML_open_lat + str(start_lat) + XML_close_lat)
+    fout.write(XML_open_lon + str(start_lon) + XML_close_lon)
+    fout.write(XML_close_position)
+    fout.write(XML_open_radius + str(radius * METERS_TO_FEET) + XML_close_radius)
+    fout.write(XML_close_circle_geo)
+    fout.write(XML_close_circle_region)  
+    
+    # add environmental data to XML file
+    count = 0 
+    for row in rows: 
+        # skip header (first) row
+        if count == 0:
+            count = count + 1
+            continue
+        fout.write(XML_open_SVP)
+        fout.write(XML_open_depth + str(float(row[2]) * METERS_TO_FEET) + XML_close_depth)
+        fout.write(XML_open_salinity + row[3] + XML_close_salinity)
+        fout.write(XML_open_water_temp + str(float(row[4]) * 1.8 + 32) + XML_close_water_temp)
+        fout.write(XML_open_sound_speed + str(float(row[5]) * METERS_TO_FEET) + XML_close_sound_speed)
+        fout.write(XML_close_SVP)
+        
+    fout.write(XML_close_properties)
+    fout.write(XML_close_environment)
+    fout.write(XML_close_miw)
+    
+    fout.close()
+    
+def vip_output(contacts, file_name):
+    # extension of VIP local waypoint file
+    VIP_EXTENSION = '.ini'
+    output_name = file_name + VIP_EXTENSION
+    # create / open output file in write mode
+    fout = open(output_name, 'w')
+    
+    for a in contacts:
+        # Contact ID as comment
+        fout.write(VIP_comment + a[0] + '\n')
+        fout.write(VIP_location + '\n')
+        fout.write(VIP_label + a[1] + '\n')
+        
+        # check for LAT sign and format
+        if a[2] > 0:
+            lat = '%.5f' % a[2] + 'N'
+        elif a[2] < 0:
+            temp = a[2] * -1
+            lat = '%.5f' % -1 * temp + 'S'
+            
+        # check of LONG sign and format
+        if a[3] > 0:
+            lon = '%.5f' % a[3] + 'E'
+        elif a[3] < 0:
+            temp = a[3] * -1
+            lon = '%.5f' % temp + 'W'
+            
+        fout.write(VIP_position + lat + ' ' + lon + '\n')
+        fout.write(VIP_offset_direction + '\n')
+        fout.write(VIP_offset_distance + '\n')
+        fout.write(VIP_offset_Y + '\n')
+        fout.write('\n') 
+        
+    fout.close()
 
 def rangeTargetFormatter( name):
     # 'C:/Users/jphilips/Documents/GitHub/target-compare/target-compare/test3.xlsx'

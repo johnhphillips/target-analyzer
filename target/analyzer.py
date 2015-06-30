@@ -1,114 +1,205 @@
-from Tkinter import *
+from math import radians, sin, cos, asin, sqrt, pow, atan2, degrees
+from myattributes import *
+import xml.etree.ElementTree as ET
 
-import tkMessageBox
-import tkFileDialog
+# TODO: Add exception handling
+# TODO: Add get functions for constants
 
-from subprocess import Popen
+EARTH_RADIUS = 6378100.
+EPSILON = 0.00002
 
-import formatter
+FEET_TO_METERS = 0.3048
+METERS_TO_FEET = 3.28084
 
-# max threshold distance between target and ground truth to state they are the same (m)
-MAX_DIST = 40
 
-ground_truth = ''
-input_file = ''
-output_file = ''
-
-def stopProg(e):
-    top.destroy()
+# helper function that returns great circle distance between two
+# points on the earth (input must be in decimal degrees)
+def _haversine(lat_1, long_1, lat_2, long_2):
     
-def _set_groundtruth(name):
-    global ground_truth
-    ground_truth = name
-    
-def _get_groundtruth():
-    return ground_truth
+    # convert decimal degrees to radians 
+    lat_1 = radians(lat_1)
+    long_1 = radians(long_1)
+    lat_2 = radians(lat_2)
+    long_2 = radians(long_2)
 
-def _set_inputfile(name):
-    global input_file
-    input_file = name
+    # haversine formula 
+    d_long = long_2 - long_1 
+    d_lat = lat_2 - lat_1 
+    a = sin(d_lat/2)**2 + cos(lat_1) * cos(lat_2) * sin(d_long/2)**2
+    c = 2 * asin(sqrt(a))  
     
-def _get_inputfile():
-    return input_file
+    m = EARTH_RADIUS * c
+    return m 
 
-def _set_outputfile(name):
-    global output_file
-    output_file = name
+# helper function that returns angular distance given distance; 
+# distance is assumed to be in meters
+def _angular_distance(distance):
+    return distance / EARTH_RADIUS
+
+# helper function that check if given coordinate pair are different
+# using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
+# be in decimal degrees and decimal degrees input 
+def _coord_check(coord_1, coord_2):  
+    if coord_2 - coord_1 < EPSILON:
+        coord_2 = coord_1
+
+    coord_2 = round(coord_2, 5)
+    return coord_2
+
+# function that returns destination point on earth
+# given start lat, long, bearing, and distance; 
+# assumed to be decimal degrees, decimal degrees, degrees
+# and meters input
+def end_point(lat_1, long_1, bearing, distance): 
+    is_negative = False 
+    # convert decimal degrees to radians 
+    lat_1 = radians(lat_1)
+    long_1 = radians(long_1)
+    if long_1 < 0:
+        is_negative = True
+        long_1 = long_1 * -1
     
-def _get_outputfile():
-    return output_file
+    bearing = radians(bearing)
+    # find destination point
+    lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
+    long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
+    a = _angular_distance(distance)
+    # find destination point
+    lat_2 = asin(sin(lat_1) * cos(a) + cos(lat_1) * sin(a) * cos(bearing))
+    long_2 = long_1 + atan2(sin(bearing) * sin(a) * cos(lat_1), cos(a) - sin(lat_1) * sin(lat_2))
+    
+    lat_2 = degrees(lat_2)
+    
+    lat_2 = _coord_check(lat_1, lat_2)    
+    
+    long_2 = degrees(long_2)
+    
+    long_2 = _coord_check(long_1, long_2)
+    
+    if is_negative == True:
+        long_2 = long_2 * -1
         
-def analyze_files():
-    # build ground truth list from input XML file
-    list_one = formatter.contact_parser(ground_truth)
+    return (lat_2, long_2)
 
-    # build contact list from contact XML file
-    list_two = formatter.contact_parser(input_file)
-    formatter.contact_localization(list_one, list_two, MAX_DIST, output_file)
-    p = Popen(output_file, shell=True)
 
-def open_groundtruth():
-    filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("XML files", "*.XML")))
-    if len(filename) > 0:
-        _set_groundtruth(filename)
-        filename = filename.split('/')
-        filename = filename[len(filename) - 1]
-        B.delete(1.0, END)
-        B.insert(END, filename)
+# function to print contact list with attributes to console 
+# for debugging
+def print_contacts(contacts):
+    # print contacts
+    for contact in contacts:
+        for attribute in contact:
+            print attribute
+        print "\n"
+        #break
+   
+
+# function for comparing two XML contact files (ground truth vs.
+# mission) and writing output to csv file
+
+# TODO: extend to any number of missions (list of contact lists as input)
+def contact_localization(ground_truth, contacts, max_dist, output_name):
+    # create / open output file in write mode
+    fout = open(output_name, 'w')
     
-def open_contacts():
-    filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("XML files", "*.XML")))
-    if len(filename) > 0:
-        _set_inputfile(filename)
-        filename = filename.split('/')
-        filename = filename[len(filename) - 1]
-        D.delete(1.0, END)
-        D.insert(END, filename)
+    # Print contact matches to ground truth position within maxDist
+    fout.write('Contact matches to ground truth position within distance of ' + str(max_dist) + ' m\n')
+    fout.write('ID, CRN, LAT, LONG, MATCH, Hd, Vd, Hd^2,, Vd^2\n')
     
-def save_filename():
-    filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
-                                                           ,("CSV files", "*.CSV")), defaultextension = ".csv")
+    matches = 0
+    horz_squared_total = 0
+    vert_squared_total = 0
     
-    if len(filename) > 0:
-        _set_outputfile(filename)
-        filename = filename.split('/')
-        filename = filename[len(filename) - 1]
-        F.delete(1.0, END)
-        F.insert(END, filename)
+    for a in ground_truth:
+        for b in contacts:
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
+            if horz_dist < max_dist:
+                # increment matches
+                matches = matches + 1
+                # check that depth is present for ground truth
+                # (in position 6)
+                if a[4] == 'Mine-Moored':
+                    # find vertical distance with ground truth at 0
+                    vert_dist = a[5] - b[5]
+                    vert_squared = pow(vert_dist, 2)
+                    vert_squared_total = vert_squared_total + vert_squared
+                    
+                else:
+                    vert_dist = "N/A"
+                    vert_squared = "N/A"
+                    
+                                
+                horz_squared = pow(horz_dist, 2)
+                horz_squared_total = horz_squared_total + horz_squared         
+                
+                fout.write(str(b[0]) + ',' + str(b[1]) + ',' + str(b[2]) + ',' + 
+                           str(b[3]) + ',' + str(a[1]) + ',' + str(horz_dist) + ',' + 
+                           str(vert_dist) + ',' + str(horz_squared) + ',,' + str(vert_squared) + '\n')
+                
+    horz_cla = sqrt(horz_squared_total / matches)
+    vert_cla = sqrt(vert_squared_total / matches)
+           
+    fout.write(',,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
+    fout.write('\n')
     
-def error(errorCode):
-    tkMessageBox.showerror("Format Error", "True Longitude for target is formatted incorrectly.\nExpected Format: XXX'XX.XXX\nCurrent Format: \nTarget not added\n\nPress OK to continue.")
+    # Print false alarms 
+    fout.write('False alarms\n')
+    fout.write('ID, CRN, LAT, LONG\n')
+    for a in contacts:
+        present = False
+        for b in ground_truth:
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
+            if horz_dist < max_dist:
+                present = True
+        if present == False:
+            fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(a[2]) + ',' + str(a[3]) + '\n')
+    fout.write('\n')     
     
-top=Tk()
-top.title("Contact Analysis Tool")
-top.minsize(250, 100)
+    fout.close()
+    
+# function for parsing contact XML file
+def contact_parser(input_name):  
+    # list to hold targets
+    contacts = []
+    
+    message = ET.ElementTree(file=input_name)
+    
+    for tContact in message.iter(tag = XML_contact):
+        # list to hold contact attributes
+        contact = []
+        
+        for attribute in tContact.iter():
+            
+            if attribute.tag == XML_contact:
+                # add ID to contact attribute list
+                contact.append(str(attribute.attrib[XML_contact_id]))
+                
+            if attribute.tag == XML_contact_crn:
+                # add CRN to contact attribute list
+                contact.append(attribute.text)
+                
+            if attribute.tag == XML_contact_lat:
+                #TODO: Add attribute units check
+                contact.append(float(attribute.text))
 
-top.iconbitmap('default.ico')
+            if attribute.tag == XML_contact_lon:
+                #TODO: Add attribute units check
+                contact.append(float(attribute.text))
+#                print attribute.attrib['units']
+                
+            if attribute.tag == XML_contact_kind:
+                contact.append(attribute.text)
 
-A = Button(top, text="Ground Truth XML File", height=1, width=20, command = open_groundtruth)
-A.grid(row=0, column=0, padx=10, pady=10)
-
-B = Text(top, height=1, width=20)
-B.grid(row=0, column=1, padx=10, pady=10)
-B.insert(END, "No file selected")
-
-C = Button(top, text="Contact XML File", height=1, width=20, command = open_contacts)
-C.grid(row=1, column=0, padx=10, pady=10)
-
-D = Text(top, height=1, width=20)
-D.grid(row=1, column=1, padx=10, pady=10)
-D.insert(END, "No file selected")
-
-E = Button(top, text="Save As", height=1, width=20, command = save_filename)
-E.grid(row=2, column=0, padx=10, pady=10)
-
-F = Text(top, height=1, width=20)
-F.grid(row=2, column=1, padx=10, pady=10)
-F.insert(END, "No file selected")
-
-G = Button(top, text="Analyze", height=1, width=20, command = analyze_files)
-G.grid(row=3, column=0, padx=10, pady=10)
-
-top.mainloop()
+            if attribute.tag == XML_contact_depth:
+                if attribute.attrib[XML_contact_depth_units] == 'ft':
+                    depth = float(attribute.text) * FEET_TO_METERS
+                    contact.append(depth)
+                    
+                # otherwise assume case depth is in meters
+                else:
+                    contact.append(float(attribute.text))
+        
+        contacts.append(contact)        
+    
+    return contacts
+    
+    
