@@ -13,7 +13,7 @@ mission_one = "M2.xml"
 name_three = "Mission 1 06274 002 Ascent"
 
 # name of output file
-output_name = "CLA"
+output_name = "CLA.csv"
 
 # build ground truth list from input XML file
 list_one = analyzer.contact_parser(ground_truth)
@@ -30,18 +30,5 @@ analyzer.contact_localization(list_one, list_two, max_dist, output_name)
 
 
 temp = analyzer.end_point(32.56203, -117.11458, 300, 15000)
-#print temp[0]
-#print temp[1]
-
-s = [2,4,4,4,5,5,7,9]
-def average(s): return sum(s) * 1.0 / len(s)
- 
-avg = average(s)
-print avg
-variance = map(lambda x: (x - avg)**2, s)
-print variance
-
-print (average(variance))
-
-standard_deviation = math.sqrt(average(variance))
-print standard_deviation
+print temp[0]
+print temp[1]

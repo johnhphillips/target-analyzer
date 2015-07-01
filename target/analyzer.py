@@ -46,6 +46,22 @@ def _coord_check(coord_1, coord_2):
     coord_2 = round(coord_2, 5)
     return coord_2
 
+# helper function that return bearing from start lat/long
+# to end lat/long (input must be in decimal degrees)
+def _bearing(lat_1, long_1, lat_2, long_2):
+    
+    # convert decimal degrees to radians 
+    lat_1 = radians(lat_1)
+    long_1 = radians(long_1)
+    lat_2 = radians(lat_2)
+    long_2 = radians(long_2)
+    
+    bearing = atan2(sin(long_2-long_1)*cos(lat_2), cos(lat_1)*sin(lat_2)-sin(lat_1)*cos(lat_2)*cos(long_2-long_1))
+    bearing = degrees(bearing)
+    bearing = (bearing + 360) % 360
+    
+    return bearing
+
 # function that returns destination point on earth
 # given start lat, long, bearing, and distance; 
 # assumed to be decimal degrees, decimal degrees, degrees
@@ -65,8 +81,8 @@ def end_point(lat_1, long_1, bearing, distance):
     long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
     a = _angular_distance(distance)
     # find destination point
-    lat_2 = asin(sin(lat_1) * cos(a) + cos(lat_1) * sin(a) * cos(bearing))
-    long_2 = long_1 + atan2(sin(bearing) * sin(a) * cos(lat_1), cos(a) - sin(lat_1) * sin(lat_2))
+    #lat_2 = asin(sin(lat_1) * cos(a) + cos(lat_1) * sin(a) * cos(bearing))
+    #long_2 = long_1 + atan2(sin(bearing) * sin(a) * cos(lat_1), cos(a) - sin(lat_1) * sin(lat_2))
     
     lat_2 = degrees(lat_2)
     
@@ -103,7 +119,7 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     
     # Print contact matches to ground truth position within maxDist
     fout.write('Contact matches to ground truth position within distance of ' + str(max_dist) + ' m\n')
-    fout.write('ID, CRN, LAT, LONG, MATCH, Hd, Vd, Hd^2,, Vd^2\n')
+    fout.write('ID, CRN, LAT, LONG, MATCH, Hd, Vd, BEARING, Hd^2,, Vd^2\n')
     
     matches = 0
     horz_squared_total = 0
@@ -115,6 +131,7 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
             if horz_dist < max_dist:
                 # increment matches
                 matches = matches + 1
+                bearing = _bearing(a[2], a[3], b[2], b[3])
                 # check that depth is present for ground truth
                 # (in position 6)
                 if a[4] == 'Mine-Moored':
@@ -133,12 +150,12 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 
                 fout.write(str(b[0]) + ',' + str(b[1]) + ',' + str(b[2]) + ',' + 
                            str(b[3]) + ',' + str(a[1]) + ',' + str(horz_dist) + ',' + 
-                           str(vert_dist) + ',' + str(horz_squared) + ',,' + str(vert_squared) + '\n')
+                           str(vert_dist) + ',' + str(bearing) + ',' + str(horz_squared) + ',,' + str(vert_squared) + '\n')
                 
     horz_cla = sqrt(horz_squared_total / matches)
     vert_cla = sqrt(vert_squared_total / matches)
            
-    fout.write(',,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
+    fout.write(',,,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
     fout.write('\n')
     
     # Print false alarms 
