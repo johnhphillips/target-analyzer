@@ -51,7 +51,6 @@ def _variance(set):
 def _stdev(set): return sqrt(_variance(set))
 
 def _stderror(set): return _stdev(set) / sqrt(len(set))
-    
 
 # helper function that check if given coordinate pair are different
 # using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
