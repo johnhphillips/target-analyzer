@@ -30,5 +30,5 @@ analyzer.contact_localization(list_one, list_two, max_dist, output_name)
 
 
 temp = analyzer.end_point(32.56203, -117.11458, 300, 15000)
-print temp[0]
-print temp[1]
+#print temp[0]
+#print temp[1]

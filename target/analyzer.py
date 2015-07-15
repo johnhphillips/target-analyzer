@@ -36,6 +36,23 @@ def _haversine(lat_1, long_1, lat_2, long_2):
 def _angular_distance(distance):
     return distance / EARTH_RADIUS
 
+def _average(set): return (sum(set) * 1.0 / len(set))
+
+def _variance(set):
+    total = 0
+    avg = _average(set)
+    for item in set:
+        total = total + (item - avg)**2
+    if len(set) == 1:
+        return total
+    
+    return total / (len(set) - 1)
+
+def _stdev(set): return sqrt(_variance(set))
+
+def _stderror(set): return _stdev(set) / sqrt(len(set))
+    
+
 # helper function that check if given coordinate pair are different
 # using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
 # be in decimal degrees and decimal degrees input 
@@ -100,7 +117,7 @@ def end_point(lat_1, long_1, bearing, distance):
 
 # function to print contact list with attributes to console 
 # for debugging
-def print_contacts(contacts):
+def _print_contacts(contacts):
     # print contacts
     for contact in contacts:
         for attribute in contact:
@@ -123,7 +140,10 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     
     matches = 0
     horz_squared_total = 0
+    horz_dists = []
     vert_squared_total = 0
+    vert_dists = []
+    
     
     for a in ground_truth:
         for b in contacts:
@@ -132,6 +152,8 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 # increment matches
                 matches = matches + 1
                 bearing = _bearing(a[2], a[3], b[2], b[3])
+                
+                horz_dists.append(horz_dist)
                 # check that depth is present for ground truth
                 # (in position 6)
                 if a[4] == 'Mine-Moored':
@@ -139,6 +161,8 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                     vert_dist = a[5] - b[5]
                     vert_squared = pow(vert_dist, 2)
                     vert_squared_total = vert_squared_total + vert_squared
+                    
+                    vert_dists.append(vert_dist)
                     
                 else:
                     vert_dist = "N/A"
@@ -156,6 +180,8 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     vert_cla = sqrt(vert_squared_total / matches)
            
     fout.write(',,,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
+    fout.write(',,,,,,,HStdev,' + str(_stdev(horz_dists)) + ',VStdev,' + str(_stdev(vert_dists)) + '\n')
+    fout.write(',,,,,,,HCI,' + str(_stderror(horz_dists) * 1.98) + ',VCI,' + str(_stderror(vert_dists) * 1.98) + '\n')
     fout.write('\n')
     
     # Print false alarms 
@@ -170,7 +196,6 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
         if present == False:
             fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(a[2]) + ',' + str(a[3]) + '\n')
     fout.write('\n')     
-    
     fout.close()
     
 # function for parsing contact XML file
@@ -178,7 +203,7 @@ def contact_parser(input_name):
     # list to hold targets
     contacts = []
     
-    message = ET.ElementTree(file=input_name)
+    message = ET.ElementTree(file = input_name)
     
     for tContact in message.iter(tag = XML_contact):
         # list to hold contact attributes
