@@ -36,7 +36,11 @@ def _haversine(lat_1, long_1, lat_2, long_2):
 def _angular_distance(distance):
     return distance / EARTH_RADIUS
 
-def _average(set): return (sum(set) * 1.0 / len(set))
+def _average(set): 
+    if len(set) > 1: 
+        return (sum(set) * 1.0 / len(set))
+    else: 
+        return set
 
 def _variance(set):
     total = 0
@@ -50,7 +54,11 @@ def _variance(set):
 
 def _stdev(set): return sqrt(_variance(set))
 
-def _stderror(set): return _stdev(set) / sqrt(len(set))
+def _stderror(set): 
+    if len(set) > 1:
+        return _stdev(set) / sqrt(len(set))
+    else:
+        return set
 
 # helper function that check if given coordinate pair are different
 # using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
@@ -153,9 +161,9 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 bearing = _bearing(a[2], a[3], b[2], b[3])
                 
                 horz_dists.append(horz_dist)
-                # check that depth is present for ground truth
-                # (in position 6)
-                if a[4] == 'Mine-Moored':
+                # check that ground truth shape is moored 
+                # and depth is present in position 6.
+                if a[4] == 'Mine-Moored':# and len(a) == 5:
                     # find vertical distance with ground truth at 0
                     vert_dist = a[5] - b[5]
                     vert_squared = pow(vert_dist, 2)

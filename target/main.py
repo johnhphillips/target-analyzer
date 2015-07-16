@@ -24,7 +24,7 @@ analyzer._print_contacts(list_one)
 analyzer._print_contacts(list_two)
 
 # build output comparison from target lists
-#analyzer.contact_localization(list_one, list_two, max_dist, output_name)
+analyzer.contact_localization(list_one, list_two, max_dist, output_name)
 
 
 #temp = analyzer.end_point(32.56203, -117.11458, 300, 15000)
