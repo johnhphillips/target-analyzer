@@ -7,8 +7,8 @@ from subprocess import Popen
 
 from target import analyzer
 
-# max threshold distance between target and ground truth to state they are the same (m)
-MAX_DIST = 40
+# max threshold distance between target and ground truth to state they are the same (m) (default of 40 m)
+max_dist = 40
 
 ground_truth = ''
 input_file = ''
@@ -17,6 +17,13 @@ output_file = ''
 def stopProg(e):
     top.destroy()
     
+def _set_maxdist(name):
+    global max_dist
+    max_dist = name
+    
+def _get_maxdist():
+    return max_dist
+
 def _set_groundtruth(name):
     global ground_truth
     ground_truth = name
@@ -39,12 +46,15 @@ def _get_outputfile():
     return output_file
         
 def analyze_files():
+    threshold = int(I.get("1.0", 'end-1c'))
+    _set_maxdist(threshold)
+    print threshold
     # build ground truth list from input XML file
     list_one = analyzer.contact_parser(ground_truth)
 
     # build contact list from contact XML file
     list_two = analyzer.contact_parser(input_file)
-    analyzer.contact_localization(list_one, list_two, MAX_DIST, output_file)
+    analyzer.contact_localization(list_one, list_two, max_dist, output_file)
     p = Popen(output_file, shell=True)
 
 def open_groundtruth():
@@ -110,5 +120,12 @@ F.insert(END, "No file selected")
 
 G = Button(top, text="Analyze", height=1, width=20, command = analyze_files)
 G.grid(row=3, column=0, padx=10, pady=10)
+
+H = Label(top, text="Contact Match Threshold (m)")
+H.grid(row=4, column=0, padx=10, pady=10)
+
+I = Text(top, height=1, width=20)
+I.grid(row=4, column=1, padx=10, pady=10)
+I.insert(END, max_dist)
 
 top.mainloop()

@@ -8,3 +8,4 @@ build
 dist
 target/setup.py
 target/CLA
+*.notazip
