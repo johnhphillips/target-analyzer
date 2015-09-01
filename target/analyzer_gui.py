@@ -4,8 +4,9 @@ import tkMessageBox
 import tkFileDialog
 
 from subprocess import Popen
+import analyzer
 
-from target import analyzer
+# TODO: Implement error checking / dialogs / prompts
 
 # max threshold distance between target and ground truth to state they are the same (m) (default of 40 m)
 max_dist = 40
@@ -46,16 +47,17 @@ def _get_outputfile():
     return output_file
         
 def analyze_files():
-    threshold = int(I.get("1.0", 'end-1c'))
+    # get threshold value from text box
+    threshold = float(I.get("1.0", 'end-1c'))
     _set_maxdist(threshold)
-    print threshold
+    
     # build ground truth list from input XML file
     list_one = analyzer.contact_parser(ground_truth)
 
     # build contact list from contact XML file
     list_two = analyzer.contact_parser(input_file)
-    analyzer.contact_localization(list_one, list_two, max_dist, output_file)
-    p = Popen(output_file, shell=True)
+    analyzer.contact_localization(list_one, list_two, _get_maxdist(), _get_outputfile())
+    p = Popen(_get_outputfile(), shell=True)
 
 def open_groundtruth():
     filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")

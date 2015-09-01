@@ -58,7 +58,7 @@ def _stderror(set):
     if len(set) > 1:
         return _stdev(set) / sqrt(len(set))
     else:
-        return set
+        return 0
 
 # helper function that check if given coordinate pair are different
 # using epsilon value, then rounds coord_2 to 5 sig figs; assumed to  
@@ -137,6 +137,8 @@ def _print_contacts(contacts):
 # mission) and writing output to csv file
 
 # TODO: extend to any number of missions (list of contact lists as input)
+# TODO: catch error case of no matches, better than hard code
+
 def contact_localization(ground_truth, contacts, max_dist, output_name):
     # create / open output file in write mode
     fout = open(output_name, 'w')
@@ -172,8 +174,8 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                     vert_dists.append(vert_dist)
                     
                 else:
-                    vert_dist = "N/A"
-                    vert_squared = "N/A"
+                    vert_dist = 'N/A'
+                    vert_squared = 'N/A'
                     
                                 
                 horz_squared = pow(horz_dist, 2)
@@ -182,10 +184,17 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 fout.write(str(b[0]) + ',' + str(b[1]) + ',' + str(b[2]) + ',' + 
                            str(b[3]) + ',' + str(a[1]) + ',' + str(horz_dist) + ',' + 
                            str(vert_dist) + ',' + str(bearing) + ',' + str(horz_squared) + ',,' + str(vert_squared) + '\n')
-                
-    horz_cla = sqrt(horz_squared_total / matches)
-    vert_cla = sqrt(vert_squared_total / matches)
-           
+    # TODO: Rework method with try/catch handling
+    if matches > 0:            
+        horz_cla = sqrt(horz_squared_total / matches)
+        vert_cla = sqrt(vert_squared_total / matches)
+        
+    else:
+        horz_cla = horz_squared_total
+        vert_cla = vert_squared_total
+    
+    # TODO: case of no matches
+    # TODO: case of no vertical matches  
     fout.write(',,,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
     fout.write(',,,,,,,HStdev,' + str(_stdev(horz_dists)) + ',VStdev,' + str(_stdev(vert_dists)) + '\n')
     fout.write(',,,,,,,HCI,' + str(_stderror(horz_dists) * 1.98) + ',VCI,' + str(_stderror(vert_dists) * 1.98) + '\n')
