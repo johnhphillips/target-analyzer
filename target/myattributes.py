@@ -66,7 +66,13 @@ VIP_offset_direction = 'Offset direction=0.0'
 VIP_offset_distance = 'Offset distance (Meters)='
 VIP_offset_Y = 'Offset Y axis (Meters)='
 
-
-
-
-
+XML_open_contact_list ='<ContactList>'
+XML_close_contact_list = '</ContactList>'
+XML_open_tac_contact = '<TacticalContact contact_id=\"'
+XML_close_tac_contact = '</TacticalContact>'
+XML_open_CRN = '<CRN>'
+XML_close_CRN = '</CRN>'
+XML_open_contact_kind = '<ContactKind>'
+XML_close_contact_kind = '</ContactKind>'
+XML_open_case_depth = '<CaseDepth units=\"ft\">'
+XML_close_case_depth = '</CaseDepth>'

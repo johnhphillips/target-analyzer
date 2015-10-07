@@ -3,6 +3,8 @@ import os
 import win32com.client
 from myattributes import *
 from target.analyzer import _haversine
+from target.myattributes import XML_open_contact_list, XML_open_tac_contact,\
+    XML_close_tac_contact, XML_close_contact_list
 
 # function for parsing Neil Brown CTD csv file (ascent or decent removed by hand)
 def ctd_parser(file_name):
@@ -279,4 +281,76 @@ def vipOutput( targets, outputName):
         print 'Offset distance (Meters)='
         print 'Offset Y axis (Meters)=\n'
 #         break
+
+def coin_output( file_name):
+    from time import localtime
+    # extension of output file, XML
+    output_name = file_name + ".xml"
+    # extension of input file, csv
+    input_name = file_name + ".csv"
+     # build timestamp    
+    current_time = localtime() 
+    date = str(current_time[0]) + "-" + str('%02.d' % current_time[1]) + "-" + str('%02.d' % current_time[2])
+    times =  "T" + str('%02.d' % current_time[3]) + ":" + str('%02.d' % current_time[4]) + ":" + str('%02.d' % current_time[5]) +".000-08:00" 
+    time_stamp = date + times
+    # open file
+    file = open(input_name, 'r')
+    # empty list of rows
+    rows = []
+        
+    for line in file:
+        # empty row of attributes
+        row = []
+        
+        current_row = line.split(',')
+        #TODO: search for appropriate attribute column
+        name = current_row[0]
+        if name == '':
+            continue
+        row.append(name)
+        lat = current_row[1]
+        row.append(lat)
+        lon = current_row[2]
+        lon = lon.replace('\n', '')
+        row.append(lon)
+       
+        
+        rows.append(row)
+        
+    file.close()
+    
+    # create / open output file in write mode
+    fout = open(output_name, 'w')
+    
+    # add header information to XML file
+    fout.write(XML_version + '\n')
+    fout.write(XML_open_miw + '\n')
+    fout.write(XML_open_header + '\n')
+    fout.write(XML_source + '\n')
+    fout.write(XML_open_timestamp + time_stamp + XML_close_timestamp + '\n')
+    fout.write(XML_open_classification + '\n')
+    fout.write(XML_classification_level + '\n')
+    fout.write(XML_close_classification + '\n')
+    fout.write(XML_close_header + '\n')
+    fout.write(XML_open_contact_list + '\n')
+    
+    # add target data to XML file
+    count = 0 
+    for row in rows: 
+
+        fout.write(XML_open_tac_contact + str(row[0]) + '\">' + '\n')
+        fout.write(XML_open_CRN + 'SSC-' + str('%03d' % (count + 1)) + XML_close_CRN + '\n')
+        fout.write(XML_open_position + '\n')
+        fout.write(XML_open_lat + str(row[1]) + XML_close_lat + '\n')
+        fout.write(XML_open_lon + str(row[2]) + XML_close_lon + '\n')
+        fout.write(XML_close_position + '\n')
+        fout.write(XML_open_contact_kind + 'MILCO' + XML_close_contact_kind + '\n')
+        fout.write(XML_close_tac_contact + '\n')
+        count = count + 1
+        
+    fout.write(XML_close_contact_list + '\n')
+    fout.write(XML_close_miw)
+        
+    fout.close()
+    
     
