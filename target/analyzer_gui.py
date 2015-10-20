@@ -105,45 +105,78 @@ def save_filename():
         filename = filename[len(filename) - 1]
         F.delete(1.0, END)
         F.insert(END, filename)
+        
+def add_box():
+    current_row = len(all_contacts)
+    f_2_x = Frame(f_2, bg = "blue")
+    f_2_x.grid(row=current_row, column=0)
+    
+    X = Button(f_2_x, text="Contact XML File", height=1, width=20, command = open_contacts)
+    X.grid(row=0, column=0, padx=10, pady=10)
+
+    Y = Text(f_2_x, height=1, width=20)
+    Y.grid(row=0, column=1, padx=10, pady=10)
+    Y.insert(END, "No file selected")
+
+    all_contacts.append( X )
     
 def error(errorCode):
     tkMessageBox.showerror("Format Error", "True Longitude for target is formatted incorrectly.\nExpected Format: XXX'XX.XXX\nCurrent Format: \nTarget not added\n\nPress OK to continue.")
     
+all_contacts = []
+
 top=Tk()
 top.title("Contact Analysis Tool")
 top.minsize(250, 100)
 
 top.iconbitmap('default.ico')
 
-A = Button(top, text="Ground Truth XML File", height=1, width=20, command = open_groundtruth)
+f_1 = Frame(top, bg = "orange")
+f_1.grid(row=0, column=0)
+
+f_2 = Frame(top)
+f_2.grid(row=1, column=0)
+
+f_2_0 = Frame(f_2, bg = "red")
+f_2_0.grid(row=0, column=0)
+
+f_3 = Frame(top, bg = "green")
+f_3.grid(row=2, column=0)
+
+A = Button(f_1, text="Ground Truth XML File", height=1, width=20, command = open_groundtruth)
 A.grid(row=0, column=0, padx=10, pady=10)
 
-B = Text(top, height=1, width=20)
+B = Text(f_1, height=1, width=20)
 B.grid(row=0, column=1, padx=10, pady=10)
 B.insert(END, "No file selected")
 
-C = Button(top, text="Contact XML File", height=1, width=20, command = open_contacts)
-C.grid(row=1, column=0, padx=10, pady=10)
+C = Button(f_2_0, text="Contact XML File", height=1, width=20, command = open_contacts)
+C.grid(row=0, column=0, padx=10, pady=10)
 
-D = Text(top, height=1, width=20)
-D.grid(row=1, column=1, padx=10, pady=10)
+D = Text(f_2_0, height=1, width=20)
+D.grid(row=0, column=1, padx=10, pady=10)
 D.insert(END, "No file selected")
 
-E = Button(top, text="Save As", height=1, width=20, command = save_filename)
-E.grid(row=2, column=0, padx=10, pady=10)
+all_contacts.append(f_2_0)
 
-F = Text(top, height=1, width=20)
-F.grid(row=2, column=1, padx=10, pady=10)
+E = Button(f_3, text="Save As", height=1, width=20, command = save_filename)
+E.grid(row=0, column=0, padx=10, pady=10)
+
+F = Text(f_3, height=1, width=20)
+F.grid(row=0, column=1, padx=10, pady=10)
 F.insert(END, "No file selected")
 
-G = Button(top, text="Analyze", height=1, width=20, command = analyze_files)
-G.grid(row=3, column=0, padx=10, pady=10)
+G = Button(f_3, text="Analyze", height=1, width=20, command = analyze_files)
+G.grid(row=1, column=0, padx=10, pady=10)
 
-H = Label(top, text="Contact Match Threshold (m)")
-H.grid(row=4, column=0, padx=10, pady=10)
+addboxButton = Button(f_3, text='Add Contact XML File', height=1, width=20, command = add_box)
+addboxButton.grid(row=1, column=1, padx=10, pady=10)
 
-I = Text(top, height=1, width=20)
-I.grid(row=4, column=1, padx=10, pady=10)
+H = Label(f_3, text="Match Threshold (m)")
+H.grid(row=2, column=0, padx=10, pady=10)
+
+I = Text(f_3, height=1, width=20)
+I.grid(row=2, column=1, padx=10, pady=10)
 I.insert(END, max_dist)
 
 top.mainloop()
