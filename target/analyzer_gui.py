@@ -77,7 +77,7 @@ def analyze_files():
 
 def open_groundtruth():
     filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("XML files", "*.XML")))
+                                                         ,("MEDAL files", "*.XML")))
     if len(filename) > 0:
         _set_groundtruth(filename)
         filename = filename.split('/')
@@ -87,7 +87,7 @@ def open_groundtruth():
     
 def open_contacts():
     filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("XML files", "*.XML")))
+                                                         ,("MEDAL files", "*.XML")))
     if len(filename) > 0:
         _set_inputfile(filename)
         filename = filename.split('/')
@@ -111,7 +111,7 @@ def add_box():
     f_2_x = Frame(f_2, bg = "blue")
     f_2_x.grid(row=current_row, column=0)
     
-    X = Button(f_2_x, text="Contact XML File", height=1, width=20, command = open_contacts)
+    X = Button(f_2_x, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
     X.grid(row=0, column=0, padx=10, pady=10)
 
     Y = Text(f_2_x, height=1, width=20)
@@ -143,14 +143,14 @@ f_2_0.grid(row=0, column=0)
 f_3 = Frame(top, bg = "green")
 f_3.grid(row=2, column=0)
 
-A = Button(f_1, text="Ground Truth XML File", height=1, width=20, command = open_groundtruth)
+A = Button(f_1, text="Ground Truth MEDAL File", height=1, width=20, command = open_groundtruth)
 A.grid(row=0, column=0, padx=10, pady=10)
 
 B = Text(f_1, height=1, width=20)
 B.grid(row=0, column=1, padx=10, pady=10)
 B.insert(END, "No file selected")
 
-C = Button(f_2_0, text="Contact XML File", height=1, width=20, command = open_contacts)
+C = Button(f_2_0, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
 C.grid(row=0, column=0, padx=10, pady=10)
 
 D = Text(f_2_0, height=1, width=20)
@@ -169,7 +169,7 @@ F.insert(END, "No file selected")
 G = Button(f_3, text="Analyze", height=1, width=20, command = analyze_files)
 G.grid(row=1, column=0, padx=10, pady=10)
 
-addboxButton = Button(f_3, text='Add Contact XML File', height=1, width=20, command = add_box)
+addboxButton = Button(f_3, text='Add Contact MEDAL File', height=1, width=20, command = add_box)
 addboxButton.grid(row=1, column=1, padx=10, pady=10)
 
 H = Label(f_3, text="Match Threshold (m)")
