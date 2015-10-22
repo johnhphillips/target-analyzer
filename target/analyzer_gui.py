@@ -14,21 +14,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from Tkinter import *
+import Tkinter as tk
 
 import tkMessageBox
 import tkFileDialog
 
 from subprocess import Popen
 import analyzer
+from target.analyzer import contact_localization
 
 # TODO: Implement error checking / dialogs / prompts
+MAX_INPUT = 10
 
 # max threshold distance between target and ground truth to state they are the same (m) (default of 40 m)
 max_dist = 40
 
+filename_default = 'No file selected'
+
 ground_truth = ''
-input_file = ''
+input_files = ['']
 output_file = ''
 
 def stopProg(e):
@@ -96,6 +100,7 @@ def open_contacts():
 #         D.delete(1.0, END)
 #         D.insert(END, filename)
         open_filename_text.set(filename)
+
     
 def save_filename():
     filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
@@ -110,79 +115,91 @@ def save_filename():
         save_filename_text.set(filename)
         
 def add_box():
-    current_row = len(all_contacts)
-    f_2_x = Frame(f_2, bg = "blue")
-    f_2_x.grid(row=current_row, column=0)
+    # check if number of inputs is less than max (10)
+    if len(input_files) < MAX_INPUT:
+        current_row = len(all_contacts)
+        middle_frame_x = tk.Frame(middle_frame, bg = "blue")
+        middle_frame_x.grid(row=current_row, column=0)
     
-    X = Button(f_2_x, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
-    X.grid(row=0, column=0, padx=10, pady=10)
+        X = tk.Button(middle_frame_x, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
+        X.grid(row=0, column=0, padx=10, pady=10)
     
-    Y = StringVar()
-    Label(f_2_x, textvariable = Y, relief=GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
-    Y.set("No file selected")
+        Y = tk.StringVar()
+        tk.Label(middle_frame_x, textvariable = Y, relief=tk.GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
+        # set file name to default
+        input_files.append(filename_default)
+        Y.set(filename_default)
+        
+        # add current contact frame to contact list
+        all_contacts.append(middle_frame_x)
+       
+    else:
+        error(2)
     
-    # add current contact frame to contact list
-    all_contacts.append(f_2_0)
-    
-def error(errorCode):
-    tkMessageBox.showerror("Format Error", "True Longitude for target is formatted incorrectly.\nExpected Format: XXX'XX.XXX\nCurrent Format: \nTarget not added\n\nPress OK to continue.")
-    
+def error(error_code):
+    if error_code == 1:
+        tkMessageBox.showerror("Format Error", "True Longitude for target is formatted incorrectly.\nExpected Format: XXX'XX.XXX\nCurrent Format: \nTarget not added\n\nPress OK to continue.")
+    if error_code == 2:
+        tkMessageBox.showerror("Input File Error", "Maximum number of input files (10) reached.\n\n\nPress OK to continue.")
+
+
 all_contacts = []
 
-top=Tk()
+top=tk.Tk()
 top.title("Contact Analysis Tool")
 top.minsize(250, 100)
 
 top.iconbitmap('default.ico')
 
-f_1 = Frame(top)
-f_1.grid(row=0, column=0)
+top_frame = tk.Frame(top)
+top_frame.grid(row=0, column=0)
 
-f_2 = Frame(top)
-f_2.grid(row=1, column=0)
+middle_frame = tk.Frame(top)
+middle_frame.grid(row=1, column=0)
 
-f_2_0 = Frame(f_2, bg = "red")
-f_2_0.grid(row=0, column=0)
+middle_frame_0 = tk.Frame(middle_frame, bg = "red")
+middle_frame_0.grid(row=0, column=0)
 
-f_3 = Frame(top)
-f_3.grid(row=2, column=0)
+bottom_frame = tk.Frame(top)
+bottom_frame.grid(row=2, column=0)
 
-open_groundtruth_button = Button(f_1, text="Ground Truth MEDAL File", height=1, width=20, command = open_groundtruth)
+open_groundtruth_button = tk.Button(top_frame, text="Ground Truth MEDAL File", height=1, width=20, command = open_groundtruth)
 open_groundtruth_button.grid(row=0, column=0, padx=10, pady=10)
 
-open_groundtruth_text = StringVar()
-Label(f_1, textvariable = open_groundtruth_text, relief=GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
-open_groundtruth_text.set("No file selected")
+open_groundtruth_text = tk.StringVar()
+tk.Label(top_frame, textvariable = open_groundtruth_text, relief=tk.GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
+open_groundtruth_text.set(filename_default)
 
-open_file_button = Button(f_2_0, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
+open_file_button = tk.Button(middle_frame_0, text="Contact MEDAL File", height=1, width=20, command = open_contacts)
 open_file_button.grid(row=0, column=0, padx=10, pady=10)
 
-open_filename_text = StringVar()
-Label(f_2_0, textvariable = open_filename_text, relief=GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
-open_filename_text.set("No file selected")
-
+open_filename_text = tk.StringVar()
+tk.Label(middle_frame_0, textvariable = open_filename_text, relief=tk.GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
+# set file name to default
+input_files[0] = filename_default
+open_filename_text.set(filename_default)
 
 # add current contact frame to contact list
-all_contacts.append(f_2_0)
+all_contacts.append(middle_frame_0)
 
-save_file_button = Button(f_3, text="Save As", height=1, width=20, command = save_filename)
+save_file_button = tk.Button(bottom_frame, text="Save As", height=1, width=20, command = save_filename)
 save_file_button.grid(row=0, column=0, padx=10, pady=10)
 
-save_filename_text = StringVar()
-Label(f_3, textvariable = save_filename_text, relief=GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
-save_filename_text.set("No file selected")
+save_filename_text = tk.StringVar()
+tk.Label(bottom_frame, textvariable = save_filename_text, relief=tk.GROOVE, height=1, width=20).grid(row=0, column=1, padx=10, pady=10)
+save_filename_text.set(filename_default)
 
-analyze_button = Button(f_3, text="Analyze", height=1, width=20, command=analyze_files)
+analyze_button = tk.Button(bottom_frame, text="Analyze", height=1, width=20, command=analyze_files)
 analyze_button.grid(row=1, column=0, padx=10, pady=10)
 
-add_file_button = Button(f_3, text="Add Contact MEDAL File", height=1, width=20, command=add_box)
+add_file_button = tk.Button(bottom_frame, text="Add Contact MEDAL File", height=1, width=20, command=add_box)
 add_file_button.grid(row=1, column=1, padx=10, pady=10)
 
-threshold_label = Label(f_3, text="Match Threshold (m)")
+threshold_label = tk.Label(bottom_frame, text="Match Threshold (m)")
 threshold_label.grid(row=2, column=0, padx=10, pady=10)
 
-threshold = Text(f_3, height=1, width=18)
+threshold = tk.Text(bottom_frame, height=1, width=18)
 threshold.grid(row=2, column=1, padx=10, pady=10)
-threshold.insert(END, max_dist)
+threshold.insert(tk.END, max_dist)
 
 top.mainloop()
