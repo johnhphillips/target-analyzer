@@ -169,7 +169,7 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     vert_squared_total = 0
     vert_dists = []
     
-    
+    # calculate CLA
     for a in ground_truth:
         for b in contacts:
             horz_dist = _haversine(a[2], a[3], b[2], b[3])
@@ -216,17 +216,80 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     fout.write(',,,,,,,HCI,' + str(_stderror(horz_dists) * 1.98) + ',VCI,' + str(_stderror(vert_dists) * 1.98) + '\n')
     fout.write('\n')
     
+    # Calculate Search Level 
+    fout.write('Search Level\n')
+    fout.write('ID, CRN, FOUND\n')
+    targets = 0
+    count = 0
+    for a in ground_truth:
+        found = False
+        
+        for b in contacts:
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
+            if horz_dist < max_dist:
+                if a[4] == 'Mine-Bottom' and (b[4] == 'MILCO' or b[4] == 'MILCO-Bottom'):
+                    found = True
+                    count = count + 1
+#                     print a[1], a[2], a[3], a[4]
+#                     print b[1], b[2], b[3], b[4]
+#                     print '---'
+                    break
+        if a[4] == 'Mine-Bottom':
+            targets = targets + 1
+            fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(found) + '\n')    
+    if targets > 0:
+#         print count, targets, (float(count) / targets)
+        search_level = float(count) / targets
+
+    else:
+        search_level = 0
+    
+    fout.write('Search Level = ' + str(search_level) + '\n')
+    fout.write('\n')
+    
+    # Calculate False Alarm Search Level
+    fout.write('False Alarm Search Level\n')
+    fout.write('ID, CRN, CALLED MILCO\n')
+    distractors = 0
+    count = 0
+    for a in ground_truth:
+        called = False
+        
+        for b in contacts:
+            horz_dist = _haversine(a[2], a[3], b[2], b[3])
+            if horz_dist < max_dist:
+                if a[4] == 'Non-MILCO' and (b[4] == 'MILCO' or b[4] == 'MILCO-Bottom'):
+                    called = True
+                    count = count + 1
+        if a[4] == 'Non-MILCO':
+            distractors = distractors + 1
+            fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(called) + '\n')
+        
+    if targets > 0:
+        search_level = float(count) / targets
+    else:
+        search_level = 0
+    
+    fout.write('False Alarm Search Level = ' + str(search_level) + '\n')
+    fout.write('\n')        
+    
     # Print false alarms 
+    count = 0
     fout.write('False alarms\n')
     fout.write('ID, CRN, LAT, LONG\n')
     for a in contacts:
         present = False
         for b in ground_truth:
+            # remove matches
             horz_dist = _haversine(a[2], a[3], b[2], b[3])
             if horz_dist < max_dist:
                 present = True
+            
         if present == False:
+            count = count + 1
             fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(a[2]) + ',' + str(a[3]) + '\n')
+
+    fout.write('False Alarms = ' + str(count) + '\n')
     fout.write('\n')     
     fout.close()
     

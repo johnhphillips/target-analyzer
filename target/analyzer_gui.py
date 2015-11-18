@@ -125,7 +125,7 @@ class Main_Application(object):
             # empty list to hold all contacts 
             list_two = []
             
-            # read individual contact XML files and product output
+            # read individual contact XML files and product output            
             for frames in self._contact_frames:
                 # if 'No file selected' skip
                 if frames._filename == self._filename_default:
@@ -141,9 +141,10 @@ class Main_Application(object):
                     
                 analyzer.contact_localization(list_one, current_list, self._threshold, current_filename)
                 p = Popen(current_filename, shell=True)
-               
-            analyzer.contact_localization(list_one, list_two, self._threshold, self._save_filename)
-            p = Popen(self._save_filename, shell=True)
+            # if more than one file create summary file
+            if len(self._contact_frames) > 1:   
+                analyzer.contact_localization(list_one, list_two, self._threshold, self._save_filename)
+                p = Popen(self._save_filename, shell=True)
             
     def error(self, error_code):
         if error_code == 2:
@@ -181,7 +182,7 @@ class Contact_Frame:
         
 def main(): 
     top = tk.Tk()
-    top.title("Contact Analysis Tool")
+    top.title("Contact Analysis Tool v1.0 b2")
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
     app = Main_Application(top)
