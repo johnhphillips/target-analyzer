@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from math import radians, sin, cos, asin, sqrt, pow, atan2, degrees
-from myattributes import *
+import myattributes as MA
 import xml.etree.ElementTree as ET
 
 # TODO: Add exception handling
@@ -52,27 +52,27 @@ def _haversine(lat_1, long_1, lat_2, long_2):
 def _angular_distance(distance):
     return distance / EARTH_RADIUS
 
-def _average(set): 
-    if len(set) > 1: 
-        return (sum(set) * 1.0 / len(set))
+def _average(num_set): 
+    if len(num_set) > 1: 
+        return (sum(num_set) * 1.0 / len(num_set))
     else: 
-        return set
+        return num_set
 
-def _variance(set):
+def _variance(num_set):
     total = 0
-    avg = _average(set)
-    for item in set:
+    avg = _average(num_set)
+    for item in num_set:
         total = total + (item - avg)**2
-    if len(set) == 1:
+    if len(num_set) == 1:
         return total
     
-    return total / (len(set) - 1)
+    return total / (len(num_set) - 1)
 
-def _stdev(set): return sqrt(_variance(set))
+def _stdev(num_set): return sqrt(_variance(num_set))
 
-def _stderror(set): 
-    if len(set) > 1:
-        return _stdev(set) / sqrt(len(set))
+def _stderror(num_set): 
+    if len(num_set) > 1:
+        return _stdev(num_set) / sqrt(len(num_set))
     else:
         return 0
 
@@ -119,7 +119,7 @@ def end_point(lat_1, long_1, bearing, distance):
     # find destination point
     lat_2 = asin(sin(lat_1) * cos(distance / EARTH_RADIUS) + cos(lat_1) * sin(distance / EARTH_RADIUS) * cos(bearing))
     long_2 = long_1 + atan2(sin(bearing) * sin(distance / EARTH_RADIUS) * cos(lat_1), cos(distance / EARTH_RADIUS) - sin(lat_1) * sin(lat_2))
-    a = _angular_distance(distance)
+    #a = _angular_distance(distance)
     # find destination point
     #lat_2 = asin(sin(lat_1) * cos(a) + cos(lat_1) * sin(a) * cos(bearing))
     #long_2 = long_1 + atan2(sin(bearing) * sin(a) * cos(lat_1), cos(a) - sin(lat_1) * sin(lat_2))
@@ -220,7 +220,7 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     fout.write('Search Level\n')
     fout.write('ID, CRN, FOUND\n')
     targets = 0
-    count = 0
+    called = 0
     for a in ground_truth:
         found = False
         
@@ -229,17 +229,13 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
             if horz_dist < max_dist:
                 if a[4] == 'Mine-Bottom' and (b[4] == 'MILCO' or b[4] == 'MILCO-Bottom'):
                     found = True
-                    count = count + 1
-#                     print a[1], a[2], a[3], a[4]
-#                     print b[1], b[2], b[3], b[4]
-#                     print '---'
+                    called = called + 1
                     break
         if a[4] == 'Mine-Bottom':
             targets = targets + 1
             fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(found) + '\n')    
     if targets > 0:
-#         print count, targets, (float(count) / targets)
-        search_level = float(count) / targets
+        search_level = float(called) / targets
 
     else:
         search_level = 0
@@ -274,8 +270,8 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     fout.write('\n')        
     
     # Print false alarms 
-    count = 0
-    fout.write('False alarms\n')
+    calls = 0
+    fout.write('False Positive Level\n')
     fout.write('ID, CRN, LAT, LONG\n')
     for a in contacts:
         present = False
@@ -286,10 +282,15 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 present = True
             
         if present == False:
-            count = count + 1
+            calls = calls + 1
             fout.write(str(a[0]) + ',' + str(a[1]) + ',' + str(a[2]) + ',' + str(a[3]) + '\n')
 
-    fout.write('False Alarms = ' + str(count) + '\n')
+    if calls > 0:
+        false_level = float(calls) / (targets + distractors)
+    else:
+        false_level = 0
+
+    fout.write('False Positive Level = ' + str(false_level) + '\n')
     fout.write('\n')     
     fout.close()
     
@@ -300,34 +301,34 @@ def contact_parser(input_name):
     
     message = ET.ElementTree(file = input_name)
     
-    for tContact in message.iter(tag = XML_contact):
+    for tContact in message.iter(tag = MA.XML_contact):
         # list to hold contact attributes
         contact = []
         
         for attribute in tContact.iter():
             
-            if attribute.tag == XML_contact:
+            if attribute.tag == MA.XML_contact:
                 # add ID to contact attribute list
-                contact.append(str(attribute.attrib[XML_contact_id]))
+                contact.append(str(attribute.attrib[MA.XML_contact_id]))
                 
-            if attribute.tag == XML_contact_crn:
+            if attribute.tag == MA.XML_contact_crn:
                 # add CRN to contact attribute list
                 contact.append(attribute.text)
                 
-            if attribute.tag == XML_contact_lat:
+            if attribute.tag == MA.XML_contact_lat:
                 #TODO: Add attribute units check
                 contact.append(float(attribute.text))
 
-            if attribute.tag == XML_contact_lon:
+            if attribute.tag == MA.XML_contact_lon:
                 #TODO: Add attribute units check
                 contact.append(float(attribute.text))
 #                print attribute.attrib['units']
                 
-            if attribute.tag == XML_contact_kind:
+            if attribute.tag == MA.XML_contact_kind:
                 contact.append(attribute.text)
 
-            if attribute.tag == XML_contact_depth:
-                if attribute.attrib[XML_contact_depth_units] == 'ft':
+            if attribute.tag == MA.XML_contact_depth:
+                if attribute.attrib[MA.XML_contact_depth_units] == 'ft':
                     depth = float(attribute.text) * FEET_TO_METERS
                     contact.append(depth)
                     

@@ -103,7 +103,7 @@ class Main_Application(object):
         filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
                                                            ,("CSV files", "*.csv")), defaultextension = ".csv")
         if len(filename) > 0:
-            path = filename
+            #path = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
             self.save_filename_text.set(filename)
@@ -125,26 +125,36 @@ class Main_Application(object):
             # empty list to hold all contacts 
             list_two = []
             
-            # read individual contact XML files and product output            
-            for frames in self._contact_frames:
-                # if 'No file selected' skip
-                if frames._filename == self._filename_default:
-                    continue
-                current_filename = frames._filename.split('.')
-                current_filename = current_filename[0] + '.csv'
-
+            # case where only one input file is used
+            if len(self._contact_frames) == 1:         
                 # build contact list from contact XML file
-                current_list = analyzer.contact_parser(frames._filename)
-                # add new to list two
-                for contacts in current_list:
-                    list_two.append(contacts)
-                    
-                analyzer.contact_localization(list_one, current_list, self._threshold, current_filename)
-                p = Popen(current_filename, shell=True)
-            # if more than one file create summary file
-            if len(self._contact_frames) > 1:   
+                list_two = analyzer.contact_parser(self._contact_frames[0]._filename)
+                
                 analyzer.contact_localization(list_one, list_two, self._threshold, self._save_filename)
-                p = Popen(self._save_filename, shell=True)
+                Popen(self._save_filename, shell=True)
+                
+            elif len(self._contact_frames) > 1:
+                # read individual contact XML files and product output            
+                for frames in self._contact_frames:
+                    # if 'No file selected' skip
+                    if frames._filename == self._filename_default:
+                        continue
+                    current_filename = frames._filename.split('.')
+                    current_filename = current_filename[0] + '.csv'
+
+                    # build contact list from contact XML file
+                    current_list = analyzer.contact_parser(frames._filename)
+                        # add new to list two
+                    for contacts in current_list:
+                        list_two.append(contacts)
+                    
+                    analyzer.contact_localization(list_one, current_list, self._threshold, current_filename)
+                    Popen(current_filename, shell=True)
+                
+                # if more than one file create summary file
+                if len(self._contact_frames) > 1:   
+                    analyzer.contact_localization(list_one, list_two, self._threshold, self._save_filename)
+                    Popen(self._save_filename, shell=True)
             
     def error(self, error_code):
         if error_code == 2:
@@ -185,7 +195,7 @@ def main():
     top.title("Contact Analysis Tool v1.0 b2")
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
-    app = Main_Application(top)
+    Main_Application(top)
     top.mainloop()
 
 if __name__ == '__main__':

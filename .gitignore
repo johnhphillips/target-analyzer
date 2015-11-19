@@ -9,3 +9,5 @@ dist
 target/setup.py
 target/CLA
 *.notazip
+target/myattributes.py
+target/myattributes.py
