@@ -158,7 +158,7 @@ class Main_Application(object):
             
     def error(self, error_code):
         if error_code == 2:
-            tkMessageBox.showerror("Input File Error", "Maximum number of input files (10) reached.\n\n\nPress OK to continue.")
+            tkMessageBox.showerror("Input File Error", "Maximum number of input files (" + str(self._max_input) + ") reached.\n\n\nPress OK to continue.")
         if error_code == 3:
             tkMessageBox.showerror("File Error", "I/O file name not selected.\n\n\nPress OK to continue.")
         
