@@ -87,6 +87,8 @@ class Main_Application(object):
         if len(filename) > 0:
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.open_groundtruth_text.set(filename)
             self._ground_truth = filename
         
@@ -106,6 +108,8 @@ class Main_Application(object):
             #path = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.save_filename_text.set(filename)
             self._save_filename = filename
             
@@ -187,6 +191,8 @@ class Contact_Frame:
         if len(filename) > 0:
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.open_filename_text.set(filename)
             self._filename = filename
         
