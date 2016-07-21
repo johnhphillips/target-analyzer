@@ -85,12 +85,13 @@ class Main_Application(object):
                                                          ,("MEDAL files", "*.XML")))
     
         if len(filename) > 0:
+            self._ground_truth = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
             if len(filename) > 20:
                 filename = filename[:20] + "..."
             self.open_groundtruth_text.set(filename)
-            self._ground_truth = filename
+            
         
     def new_contact_frame(self):
         if len(self._contact_frames) < self._max_input:
@@ -105,13 +106,12 @@ class Main_Application(object):
         filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
                                                            ,("CSV files", "*.csv")), defaultextension = ".csv")
         if len(filename) > 0:
-            #path = filename
+            self._save_filename = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
             if len(filename) > 20:
                 filename = filename[:20] + "..."
             self.save_filename_text.set(filename)
-            self._save_filename = filename
             
     def analyze_files(self):
         # get threshold value from text box
@@ -189,16 +189,17 @@ class Contact_Frame:
                                                          ,("MEDAL files", "*.XML")))
     
         if len(filename) > 0:
+            self._filename = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
             if len(filename) > 20:
                 filename = filename[:20] + "..."
             self.open_filename_text.set(filename)
-            self._filename = filename
+            
         
 def main(): 
     top = tk.Tk()
-    top.title("Contact Analysis Tool v1.0 b3") #2016 07 21
+    top.title("Contact Analysis Tool v1.0 b4") #2016 07 21
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
     Main_Application(top)
