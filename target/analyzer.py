@@ -61,10 +61,10 @@ def _average(num_set):
 def _variance(num_set):
     total = 0
     avg = _average(num_set)
-    for item in num_set:
-        total = total + (item - avg)**2
     if len(num_set) == 1:
         return total
+    for item in num_set:
+        total = total + (item - avg)**2
     
     return total / (len(num_set) - 1)
 
@@ -212,6 +212,7 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
     # TODO: case of no matches
     # TODO: case of no vertical matches  
     fout.write(',,,,,,,HCLA,' + str(horz_cla) + ',VCLA,' + str(vert_cla) + '\n')
+    print horz_dists
     fout.write(',,,,,,,HStdev,' + str(_stdev(horz_dists)) + ',VStdev,' + str(_stdev(vert_dists)) + '\n')
     fout.write(',,,,,,,HCI,' + str(_stderror(horz_dists) * 1.98) + ',VCI,' + str(_stderror(vert_dists) * 1.98) + '\n')
     fout.write('\n')

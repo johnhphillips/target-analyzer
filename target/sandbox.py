@@ -17,10 +17,9 @@
 import xlrd
 import os
 import win32com.client
-from myattributes import *
+import myattributes as MA
+
 from target.analyzer import _haversine
-from target.myattributes import XML_open_contact_list, XML_open_tac_contact,\
-    XML_close_tac_contact, XML_close_contact_list
 
 # function for parsing Neil Brown CTD csv file (ascent or decent removed by hand)
 def ctd_parser(file_name):
@@ -79,34 +78,34 @@ def ctd_parser(file_name):
     fout = open(output_name, 'w')
     
     # add header information to XML file
-    fout.write(XML_version)
-    fout.write(XML_open_miw)
-    fout.write(XML_open_header)
-    fout.write(XML_source)
-    fout.write(XML_open_timestamp + time_stamp + XML_close_timestamp)
-    fout.write(XML_open_classification)
-    fout.write(XML_classification_level)
-    fout.write(XML_close_classification)
-    fout.write(XML_close_header)
+    fout.write(MA.XML_version)
+    fout.write(MA.XML_open_miw)
+    fout.write(MA.XML_open_header)
+    fout.write(MA.XML_source)
+    fout.write(MA.XML_open_timestamp + time_stamp + MA.XML_close_timestamp)
+    fout.write(MA.XML_open_classification)
+    fout.write(MA.XML_classification_level)
+    fout.write(MA.XML_close_classification)
+    fout.write(MA.XML_close_header)
     
-    fout.write(XML_open_environment)
-    fout.write(XML_open_properties)
-    fout.write(XML_open_position)
-    fout.write(XML_open_lat + str(start_lat) + XML_close_lat)
-    fout.write(XML_open_lon + str(start_lon) + XML_close_lon)
-    fout.write(XML_close_position)
-    fout.write(XML_open_observ + time_stamp + XML_close_observ)
+    fout.write(MA.XML_open_environment)
+    fout.write(MA.XML_open_properties)
+    fout.write(MA.XML_open_position)
+    fout.write(MA.XML_open_lat + str(start_lat) + MA.XML_close_lat)
+    fout.write(MA.XML_open_lon + str(start_lon) + MA.XML_close_lon)
+    fout.write(MA.XML_close_position)
+    fout.write(MA.XML_open_observ + time_stamp + MA.XML_close_observ)
     
-    fout.write(XML_open_circle_region)
-    fout.write(XML_open_region_name + file_name + XML_close_region_name)
-    fout.write(XML_open_circle_geo)
-    fout.write(XML_open_position)
-    fout.write(XML_open_lat + str(start_lat) + XML_close_lat)
-    fout.write(XML_open_lon + str(start_lon) + XML_close_lon)
-    fout.write(XML_close_position)
-    fout.write(XML_open_radius + str(radius * METERS_TO_FEET) + XML_close_radius)
-    fout.write(XML_close_circle_geo)
-    fout.write(XML_close_circle_region)  
+    fout.write(MA.XML_open_circle_region)
+    fout.write(MA.XML_open_region_name + file_name + MA.XML_close_region_name)
+    fout.write(MA.XML_open_circle_geo)
+    fout.write(MA.XML_open_position)
+    fout.write(MA.XML_open_lat + str(start_lat) + MA.XML_close_lat)
+    fout.write(MA.XML_open_lon + str(start_lon) + MA.XML_close_lon)
+    fout.write(MA.XML_close_position)
+    fout.write(MA.XML_open_radius + str(radius * METERS_TO_FEET) + MA.XML_close_radius)
+    fout.write(MA.XML_close_circle_geo)
+    fout.write(MA.XML_close_circle_region)  
     
     # add environmental data to XML file
     count = 0 
@@ -115,16 +114,16 @@ def ctd_parser(file_name):
         if count == 0:
             count = count + 1
             continue
-        fout.write(XML_open_SVP)
-        fout.write(XML_open_depth + str(float(row[2]) * METERS_TO_FEET) + XML_close_depth)
-        fout.write(XML_open_salinity + row[3] + XML_close_salinity)
-        fout.write(XML_open_water_temp + str(float(row[4]) * 1.8 + 32) + XML_close_water_temp)
-        fout.write(XML_open_sound_speed + str(float(row[5]) * METERS_TO_FEET) + XML_close_sound_speed)
-        fout.write(XML_close_SVP)
+        fout.write(MA.XML_open_SVP)
+        fout.write(MA.XML_open_depth + str(float(row[2]) * METERS_TO_FEET) + MA.XML_close_depth)
+        fout.write(MA.XML_open_salinity + row[3] + MA.XML_close_salinity)
+        fout.write(MA.XML_open_water_temp + str(float(row[4]) * 1.8 + 32) + MA.XML_close_water_temp)
+        fout.write(MA.XML_open_sound_speed + str(float(row[5]) * METERS_TO_FEET) + MA.XML_close_sound_speed)
+        fout.write(MA.XML_close_SVP)
         
-    fout.write(XML_close_properties)
-    fout.write(XML_close_environment)
-    fout.write(XML_close_miw)
+    fout.write(MA.XML_close_properties)
+    fout.write(MA.XML_close_environment)
+    fout.write(MA.XML_close_miw)
     
     fout.close()
     
@@ -137,9 +136,9 @@ def vip_output(contacts, file_name):
     
     for a in contacts:
         # Contact ID as comment
-        fout.write(VIP_comment + a[0] + '\n')
-        fout.write(VIP_location + '\n')
-        fout.write(VIP_label + a[1] + '\n')
+        fout.write(MA.VIP_comment + a[0] + '\n')
+        fout.write(MA.VIP_location + '\n')
+        fout.write(MA.VIP_label + a[1] + '\n')
         
         # check for LAT sign and format
         if a[2] > 0:
@@ -155,10 +154,10 @@ def vip_output(contacts, file_name):
             temp = a[3] * -1
             lon = '%.5f' % temp + 'W'
             
-        fout.write(VIP_position + lat + ' ' + lon + '\n')
-        fout.write(VIP_offset_direction + '\n')
-        fout.write(VIP_offset_distance + '\n')
-        fout.write(VIP_offset_Y + '\n')
+        fout.write(MA.VIP_position + lat + ' ' + lon + '\n')
+        fout.write(MA.VIP_offset_direction + '\n')
+        fout.write(MA.VIP_offset_distance + '\n')
+        fout.write(MA.VIP_offset_Y + '\n')
         fout.write('\n') 
         
     fout.close()
@@ -339,33 +338,33 @@ def coin_output( file_name):
     fout = open(output_name, 'w')
     
     # add header information to XML file
-    fout.write(XML_version + '\n')
-    fout.write(XML_open_miw + '\n')
-    fout.write(XML_open_header + '\n')
-    fout.write(XML_source + '\n')
-    fout.write(XML_open_timestamp + time_stamp + XML_close_timestamp + '\n')
-    fout.write(XML_open_classification + '\n')
-    fout.write(XML_classification_level + '\n')
-    fout.write(XML_close_classification + '\n')
-    fout.write(XML_close_header + '\n')
-    fout.write(XML_open_contact_list + '\n')
+    fout.write(MA.XML_version + '\n')
+    fout.write(MA.XML_open_miw + '\n')
+    fout.write(MA.XML_open_header + '\n')
+    fout.write(MA.XML_source + '\n')
+    fout.write(MA.XML_open_timestamp + time_stamp + MA.XML_close_timestamp + '\n')
+    fout.write(MA.XML_open_classification + '\n')
+    fout.write(MA.XML_classification_level + '\n')
+    fout.write(MA.XML_close_classification + '\n')
+    fout.write(MA.XML_close_header + '\n')
+    fout.write(MA.XML_open_contact_list + '\n')
     
     # add target data to XML file
     count = 0 
     for row in rows: 
 
-        fout.write(XML_open_tac_contact + str(row[0]) + '\">' + '\n')
-        fout.write(XML_open_CRN + 'SSC-' + str('%03d' % (count + 1)) + XML_close_CRN + '\n')
-        fout.write(XML_open_position + '\n')
-        fout.write(XML_open_lat + str(row[1]) + XML_close_lat + '\n')
-        fout.write(XML_open_lon + str(row[2]) + XML_close_lon + '\n')
-        fout.write(XML_close_position + '\n')
-        fout.write(XML_open_contact_kind + 'MILCO' + XML_close_contact_kind + '\n')
-        fout.write(XML_close_tac_contact + '\n')
+        fout.write(MA.XML_open_tac_contact + str(row[0]) + '\">' + '\n')
+        fout.write(MA.XML_open_CRN + 'SSC-' + str('%03d' % (count + 1)) + MA.XML_close_CRN + '\n')
+        fout.write(MA.XML_open_position + '\n')
+        fout.write(MA.XML_open_lat + str(row[1]) + MA.XML_close_lat + '\n')
+        fout.write(MA.XML_open_lon + str(row[2]) + MA.XML_close_lon + '\n')
+        fout.write(MA.XML_close_position + '\n')
+        fout.write(MA.XML_open_contact_kind + 'MILCO' + MA.XML_close_contact_kind + '\n')
+        fout.write(MA.XML_close_tac_contact + '\n')
         count = count + 1
         
-    fout.write(XML_close_contact_list + '\n')
-    fout.write(XML_close_miw)
+    fout.write(MA.XML_close_contact_list + '\n')
+    fout.write(MA.XML_close_miw)
         
     fout.close()
     

@@ -192,7 +192,7 @@ class Contact_Frame:
         
 def main(): 
     top = tk.Tk()
-    top.title("Contact Analysis Tool v1.0 b2")
+    top.title("Contact Analysis Tool v1.0 b3") #2016 07 21
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
     Main_Application(top)
