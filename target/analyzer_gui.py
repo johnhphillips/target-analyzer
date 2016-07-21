@@ -87,6 +87,8 @@ class Main_Application(object):
         if len(filename) > 0:
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.open_groundtruth_text.set(filename)
             self._ground_truth = filename
         
@@ -106,6 +108,8 @@ class Main_Application(object):
             #path = filename
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.save_filename_text.set(filename)
             self._save_filename = filename
             
@@ -158,7 +162,7 @@ class Main_Application(object):
             
     def error(self, error_code):
         if error_code == 2:
-            tkMessageBox.showerror("Input File Error", "Maximum number of input files (10) reached.\n\n\nPress OK to continue.")
+            tkMessageBox.showerror("Input File Error", "Maximum number of input files (" + str(self._max_input) + ") reached.\n\n\nPress OK to continue.")
         if error_code == 3:
             tkMessageBox.showerror("File Error", "I/O file name not selected.\n\n\nPress OK to continue.")
         
@@ -187,6 +191,8 @@ class Contact_Frame:
         if len(filename) > 0:
             filename = filename.split('/')
             filename = filename[len(filename) - 1]
+            if len(filename) > 20:
+                filename = filename[:20] + "..."
             self.open_filename_text.set(filename)
             self._filename = filename
         
