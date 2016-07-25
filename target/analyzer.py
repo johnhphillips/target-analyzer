@@ -181,7 +181,12 @@ def contact_localization(ground_truth, contacts, max_dist, output_name):
                 horz_dists.append(horz_dist)
                 # check that ground truth shape is moored 
                 # and depth is present in position 6.
-                if a[4] == 'Mine-Moored':# and len(a) == 5:
+                if a[4] == 'Mine-Moored' and len(a) == 6:
+                    for thing in a:
+                        print thing
+                    print "---"
+                    for thing in b:
+                        print thing
                     # find vertical distance with ground truth at 0
                     vert_dist = a[5] - b[5]
                     vert_squared = pow(vert_dist, 2)

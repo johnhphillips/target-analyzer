@@ -129,11 +129,15 @@ class Main_Application(object):
             # empty list to hold all contacts 
             list_two = []
             
+            
+            
             # case where only one input file is used
             if len(self._contact_frames) == 1:         
                 # build contact list from contact XML file
                 list_two = analyzer.contact_parser(self._contact_frames[0]._filename)
-                
+#                 analyzer._print_contacts(list_one)
+#                 print "---"
+#                 analyzer._print_contacts(list_two)
                 analyzer.contact_localization(list_one, list_two, self._threshold, self._save_filename)
                 Popen(self._save_filename, shell=True)
                 
@@ -199,7 +203,7 @@ class Contact_Frame:
         
 def main(): 
     top = tk.Tk()
-    top.title("Contact Analysis Tool v1.0 b4") #2016 07 21
+    top.title("Contact Analysis Tool v1.0 b5") #2016 07 25
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
     Main_Application(top)
