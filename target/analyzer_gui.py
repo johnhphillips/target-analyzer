@@ -38,7 +38,7 @@ class Main_Application(tk.Frame):
         self._save_filename = self._filename_default
         
         # Build top frame
-        self.top_frame = tk.Frame(self.master)
+        self.top_frame = tk.Frame(self.parent)
         self.top_frame.grid(row=0, column=0)
         
         # Populate top frame
@@ -50,13 +50,13 @@ class Main_Application(tk.Frame):
         self.open_groundtruth_text.set(self._ground_truth)
         
         # Build middle frame / first inner frame
-        self.middle_frame = tk.Frame(self.master)
+        self.middle_frame = tk.Frame(self.parent)
         self.middle_frame.grid(row=1, column=0)
 
         # Build first inner frame and populate
         self.new_contact_frame()
             
-        self.bottom_frame = tk.Frame(self.master)
+        self.bottom_frame = tk.Frame(self.parent)
         self.bottom_frame.grid(row=2, column=0)
         
         # Populate the bottom frame
@@ -171,13 +171,13 @@ class Main_Application(tk.Frame):
             tkMessageBox.showerror("File Error", "I/O file name not selected.\n\n\nPress OK to continue.")
         
 class Contact_Frame:
-    def __init__(self, master):
-        self.master = master
+    def __init__(self, parent):
+        self.parent = parent
         
-        self.current_row = len(master._contact_frames)
-        self._filename = master._filename_default
+        self.current_row = len(parent._contact_frames)
+        self._filename = parent._filename_default
         
-        self.middle_frame_0 = tk.Frame(master.middle_frame)
+        self.middle_frame_0 = tk.Frame(parent.middle_frame)
         self.middle_frame_0.grid(row=self.current_row, column=0)
             
         open_file_button = tk.Button(self.middle_frame_0, text="Contact MEDAL File", height=1, width=20, command = self._set_filename)

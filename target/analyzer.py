@@ -20,6 +20,8 @@ import xml.etree.ElementTree as ET
 
 # TODO: Add exception handling
 # TODO: Add get functions for constants
+# TODO: Add Contact Class
+# TODO: Merge with analyzer_gui
 
 EARTH_RADIUS = 6378100.
 EPSILON = 0.00002
