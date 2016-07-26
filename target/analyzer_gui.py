@@ -22,11 +22,11 @@ from subprocess import Popen
 
 import analyzer
 
-class Main_Application(object):
-
+class Main_Application(tk.Frame):
     # Initialize main window
-    def __init__(self, master):
-        self.master = master
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
         
         self._max_input = 10
         self._filename_default = 'No file selected'
