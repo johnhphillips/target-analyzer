@@ -81,8 +81,8 @@ class Main_Application(tk.Frame):
         self.threshold.insert(tk.END, self._threshold)
         
     def open_filename(self):
-        filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("MEDAL files", "*.XML")))
+        filename = tkFileDialog.askopenfilename(filetypes = (("MEDAL files", "*.xml")
+                                                         ,("All files", "*.*")))
     
         if len(filename) > 0:
             self._ground_truth = filename
@@ -103,8 +103,8 @@ class Main_Application(tk.Frame):
         
     def save_filename(self):
         
-        filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
-                                                           ,("CSV files", "*.csv")), defaultextension = ".csv")
+        filename = tkFileDialog.asksaveasfilename(filetypes = (("CSV files", "*.csv")
+                                                           ,("All files", "*.*")), defaultextension = ".csv")
         if len(filename) > 0:
             self._save_filename = filename
             filename = filename.split('/')
@@ -123,17 +123,15 @@ class Main_Application(tk.Frame):
             return
     
         else:
-            # build ground truth list from input XML file
+            # build ground truth list from input xml file
             list_one = analyzer.contact_parser(self._ground_truth)
             
             # empty list to hold all contacts 
             list_two = []
             
-            
-            
             # case where only one input file is used
             if len(self._contact_frames) == 1:         
-                # build contact list from contact XML file
+                # build contact list from contact xml file
                 list_two = analyzer.contact_parser(self._contact_frames[0]._filename)
 #                 analyzer._print_contacts(list_one)
 #                 print "---"
@@ -142,7 +140,7 @@ class Main_Application(tk.Frame):
                 Popen(self._save_filename, shell=True)
                 
             elif len(self._contact_frames) > 1:
-                # read individual contact XML files and product output            
+                # read individual contact xml files and product output            
                 for frames in self._contact_frames:
                     # if 'No file selected' skip
                     if frames._filename == self._filename_default:
@@ -150,7 +148,7 @@ class Main_Application(tk.Frame):
                     current_filename = frames._filename.split('.')
                     current_filename = current_filename[0] + '.csv'
 
-                    # build contact list from contact XML file
+                    # build contact list from contact xml file
                     current_list = analyzer.contact_parser(frames._filename)
                         # add new to list two
                     for contacts in current_list:
@@ -189,8 +187,8 @@ class Contact_Frame:
         self.open_filename_text.set(self._filename)
         
     def _set_filename(self):
-        filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
-                                                         ,("MEDAL files", "*.XML")))
+        filename = tkFileDialog.askopenfilename(filetypes = (("MEDAL files", "*.xml")
+                                                         ,("All files", "*.*")))
     
         if len(filename) > 0:
             self._filename = filename
@@ -202,8 +200,11 @@ class Contact_Frame:
             
         
 def main(): 
+    VERSION = '1.0.0.5'
+    VERSION_NAME = 'Contact Analysis Tool'
+    
     top = tk.Tk()
-    top.title("Contact Analysis Tool v1.0 b5") #2016 07 25
+    top.title(VERSION_NAME + ' v' + VERSION) 
     top.minsize(250, 100)
     top.iconbitmap('default.ico')
     Main_Application(top)
