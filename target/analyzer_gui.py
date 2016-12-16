@@ -81,8 +81,8 @@ class Main_Application(tk.Frame):
         self.threshold.insert(tk.END, self._threshold)
         
     def open_filename(self):
-        filename = tkFileDialog.askopenfilename(filetypes = (("MEDAL files", "*.xml")
-                                                         ,("All files", "*.*")))
+        filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
+                                                         ,("MEDAL files", "*.xml")))
     
         if len(filename) > 0:
             self._ground_truth = filename
@@ -103,8 +103,8 @@ class Main_Application(tk.Frame):
         
     def save_filename(self):
         
-        filename = tkFileDialog.asksaveasfilename(filetypes = (("CSV files", "*.csv")
-                                                           ,("All files", "*.*")), defaultextension = ".csv")
+        filename = tkFileDialog.asksaveasfilename(filetypes = (("All files", "*.*")
+                                                           ,("CSV files", "*.csv")))
         if len(filename) > 0:
             self._save_filename = filename
             filename = filename.split('/')
@@ -145,7 +145,8 @@ class Main_Application(tk.Frame):
                     # if 'No file selected' skip
                     if frames._filename == self._filename_default:
                         continue
-                    current_filename = frames._filename.split('.')
+                    current_filename = frames._filename.replace('XML', 'xml')
+                    current_filename = current_filename.split('.xml')
                     current_filename = current_filename[0] + '.csv'
 
                     # build contact list from contact xml file
@@ -187,8 +188,8 @@ class Contact_Frame:
         self.open_filename_text.set(self._filename)
         
     def _set_filename(self):
-        filename = tkFileDialog.askopenfilename(filetypes = (("MEDAL files", "*.xml")
-                                                         ,("All files", "*.*")))
+        filename = tkFileDialog.askopenfilename(filetypes = (("All files", "*.*")
+                                                         ,("MEDAL files", "*.xml")))
     
         if len(filename) > 0:
             self._filename = filename
@@ -200,7 +201,7 @@ class Contact_Frame:
             
         
 def main(): 
-    VERSION = '1.0.0.5'
+    VERSION = '1.0.0.6'
     VERSION_NAME = 'Contact Analysis Tool'
     
     top = tk.Tk()
